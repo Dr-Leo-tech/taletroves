@@ -1,0 +1,328 @@
+/* 1. Ensure the height is set on the root elements */
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+/* 2. Turn the body into a flexbox column */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Ensures it's at least as tall as the screen */
+}
+
+/* 3. The magic: Give your content container 'flex: 1' */
+/* This pushes the footer down by gobbling up all available space */
+.story-container, .stories, .container, main {
+    flex: 1 0 auto;
+}
+
+/* 4. Keep the footer at the bottom */
+footer, .js-footer {
+    flex-shrink: 0;
+}
+
+
+a{
+  text-decoration: none;
+  color: #667eea;
+}
+
+/* Update these in Main.css */
+header {
+  background: #667eea;
+  color: #fff;
+  padding: 10px 0; /* Vertical breathing room */
+  display: flex;
+  justify-content: center; /* Centers the inner container */
+  width: 100%;
+}
+
+.nav-container {
+  width: 95%;
+  max-width: 1200px; /* Matches your dashboard and stories max-width */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Ensure logo and button don't have conflicting margins */
+.logo-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+
+header nav a{
+  color: #fff;
+  margin: 0 10px;
+  text-decoration: none;
+  font-weight: bold;
+}
+/* Modern Hero Section */
+.hero {
+     background: linear-gradient(120deg, #667eea, #764ba2);
+    color: white;
+    padding: 80px 20px;
+    text-align: center;
+    border-radius: 0 0 50px 50px; /* Gives a nice curved bottom */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    margin-bottom: 40px;
+}
+
+.hero h1 {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* Optional: Add a subtle floating animation to the hero text */
+.hero h1, .hero p {
+    animation: fadeInUp 1s ease-out;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+.join{
+  background: linear-gradient(120deg, #667eea, #764ba2);
+  color: #fff;
+  text-align: center;
+  padding: 20px 30px;
+  margin: 40px 0;
+}
+.join button{
+  border: none;
+  padding: 12px 20px;
+  font-size: 1.1em;
+  cursor: pointer;
+}
+footer{
+  background: #333;
+  color: #ccc;
+  text-align: center;
+  padding: 15px 10px;
+  margin-top: auto;
+}
+footer a{
+  color: #ccc;
+  cursor: pointer;
+  text-decoration: none;
+  margin: 0 5px;
+}
+
+.sidebar {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background: #667eea;
+  overflow-x: hidden;
+  padding-top: 60px;
+  transition: 0.5s;
+}
+
+.sidebar a {
+  padding: 8px 8px 8px 32px;
+  text-decoration: none;
+  font-size: 25px;
+  color: #fff;
+  display: block;
+  transition: 0.3s;
+}
+
+.sidebar a:hover {
+  color: #f1f1f1;
+}
+
+.sidebar .closebtn {
+  position: absolute;
+  top: 0;
+  right: 25px;
+  font-size: 36px;
+  margin-left: 50px;
+}
+
+.openbtn {
+  font-size: 20px;
+  cursor: pointer;
+  background: transparent;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  width: 50px;
+}
+
+.openbtn:hover {
+  background-color: #444;
+}
+
+#main {
+  transition: margin-left .5s;
+  padding: 20px;
+}
+
+@media screen and (max-height: 450px) {
+  .sidebar {padding-top: 15px;}
+  .sidebar a {font-size: 18px;}
+}
+
+/* The Magic Book Shape */
+.magic-book {
+    position: relative;
+    width: 30px;
+    height: 38px;
+    border: 3px solid #764ba2;
+    border-radius: 3px 6px 6px 3px;
+    background: white; /* The "Pages" */
+    animation: float 3s ease-in-out infinite;
+}
+
+/* The Spine/Cover Detail */
+.book-cover {
+    position: absolute;
+    left: -3px;
+    top: -3px;
+    width: 8px;
+    height: 38px;
+    background: #764ba2;
+    border-radius: 3px 0 0 3px;
+}
+
+/* Inner Page Line */
+.book-line {
+    position: absolute;
+    right: 5px;
+    top: 15px;
+    width: 10px;
+    height: 2px;
+    background: #e0e0e0;
+    box-shadow: 0 6px 0 #e0e0e0, 0 -6px 0 #e0e0e0;
+}
+
+/* Floating Stars/Sparkles */
+.sparkle {
+    position: absolute;
+    color: #FFD700;
+    font-size: 12px;
+    pointer-events: none;
+}
+
+.sp-1 { top: -12px; right: -8px; animation: blink 2s infinite; }
+.sp-2 { bottom: 5px; right: -15px; animation: blink 2s infinite 1s; }
+
+/* Animations */
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 0; transform: scale(0.5); }
+    50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* Logo Text - Matching your theme */
+.logo-text {
+    font-family: 'Segoe UI', sans-serif;
+    font-weight: 800;
+    font-size: 24px;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #fff, #ccc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.story-meta-info {
+    display: flex;
+    gap: 15px;
+    font-size: 0.85em;
+    color: #666;
+    margin-bottom: 12px;
+}
+.action-btn {
+    background: white;
+    border: 1px solid #764ba2;
+    color: #764ba2;
+    padding: 6px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.2s;
+}
+.action-btn:hover {
+    background: #764ba2;
+    color: white;
+}
+
+
+.install-card{
+position:fixed;
+bottom:20px;
+left:50%;
+transform:translateX(-50%);
+width:90%;
+max-width:420px;
+background:white;
+border-radius:12px;
+box-shadow:0 4px 20px rgba(0,0,0,0.15);
+padding:15px;
+font-family:sans-serif;
+z-index:9999;
+}
+
+.install-info{
+display:flex;
+align-items:center;
+gap:12px;
+margin-bottom:12px;
+}
+
+.app-icon{
+width:50px;
+height:50px;
+border-radius:10px;
+}
+
+.app-details h3{
+margin:0;
+font-size:18px;
+}
+
+.rating{
+margin:2px 0;
+color:#ffaa00;
+}
+
+.category{
+margin:0;
+color:gray;
+font-size:14px;
+}
+
+.install-btn{
+display:block;
+text-align:center;
+background:#1877f2;
+color:white;
+padding:10px;
+border-radius:8px;
+text-decoration:none;
+font-weight:bold;
+}
+

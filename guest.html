@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2W62NFYZJ3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-2W62NFYZJ3');
+</script>
+
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="main.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>Guest Mode | TaleTrove</title>
+    
+    <style>
+        /* Using the styles from TaleTrove.html for consistency */
+        .stories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        .story-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border-top: 5px solid #764ba2;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .story-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+        .guest-btn, button{
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 5px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: 0.3s;
+        }
+        .guest-btn:hover {
+            background: #e2e6ea;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="js-header"></div>
+
+    <div class="hero">
+      <h1>Explore TaleTrove</h1>
+      <p>Browse our collection of stories. Sign up to leave your mark!</p>
+      <a href="index.html">
+        <button>Create an Account</button>
+      </a>
+    </div>
+    
+    <div class="stories">
+      <h2>Latest Chronicles</h2>
+      <div id="guestStoriesGrid" class="stories-grid">
+          <p>Opening the archives...</p>
+      </div>
+    </div>
+    
+    <div class="join">
+      <h2>Found a story you love?</h2>
+      <p>Sign up to join the conversation and support authors.</p>
+      <a href="index.html">
+        <button>Join Community</button>
+      </a>
+    </div>
+
+    <div class="js-footer"></div>
+    <script>
+    // Supabase configuration
+const supabaseUrl = 'https://oadbiabeqavrvtymcvuv.supabase.co';
+const supabaseKey = 'sb_publishable_cQvpBFh00y0lujudlGhlJQ_ltN3ltN7';
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+async function loadGuestStories() {
+    // 1. Updated Select query to fetch counts for likes and comments
+    const { data, error } = await supabaseClient
+        .from('stories')
+        .select(`
+            id, 
+            title, 
+            content,
+            likes(count),
+            comments(count)
+        `)
+        .limit(6) 
+        .order('created_at', { ascending: false });
+
+    const grid = document.getElementById('guestStoriesGrid');
+    
+    if (error || !data) {
+        grid.innerHTML = "<p>Error loading stories. Please try again later.</p>";
+        return;
+    }
+
+    grid.innerHTML = data.map(story => {
+        // 2. Extract counts safely (similar to Stories.html logic)
+        const likeCount = story.likes?.[0]?.count || 0;
+        const commentCount = story.comments?.[0]?.count || 0;
+
+        return `
+            <div class="story-card">
+                <div>
+                    <h3 style="color: #764ba2; margin-top: 0;">${story.title}</h3>
+                    <p style="color: #666; font-size: 0.95em; line-height: 1.6;">
+                        ${story.content.substring(0, 100)}...
+                    </p>
+                    
+                    <div style="margin-bottom: 15px; font-size: 0.9em; color: #764ba2;">
+                        <span style="margin-right: 15px;">❤️ ${likeCount}</span>
+                        <span>💬 ${commentCount}</span>
+                    </div>
+
+                    <a href="Story.html?id=${story.id}" style="color: #764ba2; font-weight: bold; text-decoration: none;">Read More →</a>
+                </div>
+                
+                <div class="story-actions">
+                    <button class="guest-btn" onclick="restrictedAction()">❤️ Like</button>
+                    <button class="guest-btn" onclick="restrictedAction()">💬 Comment</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function restrictedAction() {
+    alert("You need to be logged in to like or comment on stories!");
+    window.location.href = "index.html"; 
+}
+
+window.onload = loadGuestStories;
+  </script>
+    <script type="module"src="main.js">
+</script>
+</body>
+</html>

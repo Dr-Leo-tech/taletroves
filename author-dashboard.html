@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2W62NFYZJ3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-2W62NFYZJ3');
+</script>
+
+  <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="main.css">
+    
+  <title>User Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <style>
+   
+    .container {
+        width: 95%;           /* Fills the screen on mobile */
+        max-width: 1200px;    /* Match the 'Stories' page width */
+        margin: 0 auto;       
+        padding: 20px 0;      
+        box-sizing: border-box; 
+    }
+
+    /* Add this to prevent the card from feeling too tight */
+    .card {
+        background: white;
+        padding: 25px;        
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        margin-bottom: 25px;
+        box-sizing: border-box;
+    }
+
+    /* 3. Form Elements: Make sure they don't pop out of the card */
+    .form-group { margin-bottom: 15px; width: 100%; }
+    
+    input, textarea, select { 
+        width: 100%; 
+        padding: 12px; 
+        border: 1px solid #ddd; 
+        border-radius: 8px; 
+        font-size: 16px;
+        box-sizing: border-box; /* Crucial: keeps padding inside the width */
+    }
+
+    h1 { color: #667eea; margin-top: 10px; }
+    
+    button { 
+        background: #667eea; 
+        color: white; 
+        border: none; 
+        padding: 12px 20px; 
+        border-radius: 8px; 
+        cursor: pointer; 
+        font-weight: bold; 
+        width: 100%; /* Makes the button easy to tap on mobile */
+    }
+
+    .logout-btn { 
+        background: #ff4b2b; 
+        margin-top: 20px; 
+    }
+
+    .story-card { 
+        border-left: 5px solid #667eea; 
+        background: #fafafa; 
+        padding: 15px; 
+        margin-top: 15px; 
+        border-radius: 4px; 
+    }
+</style>
+
+</head>
+<body>
+
+  <!-- HEADER -->
+<div class="js-header"></div>
+
+<div class="container">
+    <h1>Author Dashboard ✍️</h1>
+    <p id="welcomeMsg">Loading...</p>
+
+    <div class="card" style="background: #eef2f3; padding: 25px; border-radius: 12px;">
+    <h3>Post a New Chapter 📖</h3>
+    
+    <div class="form-group">
+        <label>Which Story?</label>
+        <select id="storySelect" onchange="toggleNewStoryFields()" style="width: 100%; padding: 12px; border-radius: 8px; margin-top:5px;">
+            <option value="new">+ Start a Brand New Story</option>
+        </select>
+    </div>
+
+    <div id="newStoryFields">
+        <div class="form-group">
+            <label>Story Title</label>
+            <input type="text" id="storyTitle" placeholder="e.g. Chronicles of the Void">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Chapter Title</label>
+        <input type="text" id="chapterTitle" placeholder="e.g. Chapter 1: The Awakening">
+    </div>
+
+    <div class="form-group">
+        <label>Chapter Content</label>
+        <textarea id="storyContent" rows="10" placeholder="Once upon a time..."></textarea>
+    </div>
+
+    <button onclick="publishChapter()" id="publishBtn">Publish to Tale Trove</button>
+</div>
+
+
+    <hr>
+    <h3>Your Published Stories</h3>
+    <div id="myStories">Loading your stories...</div>
+
+    <button class="logout-btn" onclick="logout()">Logout</button>
+</div>
+
+<script>
+    const supabaseUrl = 'https://oadbiabeqavrvtymcvuv.supabase.co';
+    const supabaseKey = 'sb_publishable_cQvpBFh00y0lujudlGhlJQ_ltN3ltN7';
+    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+    let currentUser = null;
+
+    // 1. Initial Check & Data Load
+    document.addEventListener("DOMContentLoaded", async () => {
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        
+        if (!user) {
+            window.location.href = "Index.html";
+            return;
+        }
+
+        currentUser = user;
+
+        // Fetch profile to verify role and get username
+        const { data: profile } = await supabaseClient
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+
+        if (!profile || profile.role !== 'author') {
+            window.location.href = "dashboard.html"; 
+            return;
+        }
+
+        document.getElementById('welcomeMsg').innerHTML = `Welcome back, <strong>${profile.username}</strong>!`;
+        
+        // FIXED: Passing the current user ID to the fetch function
+        fetchMyStories(user.id); 
+    });
+
+   // Toggle the Story Title input
+function toggleNewStoryFields() {
+    const isNew = document.getElementById('storySelect').value === 'new';
+    document.getElementById('newStoryFields').style.display = isNew ? 'block' : 'none';
+}
+
+// Update the dropdown list when the page loads
+async function fetchMyStories(authorId) {
+    const { data: stories, error } = await supabaseClient
+        .from('stories')
+        .select('id, title, content') // Added content here so we can edit it
+        .eq('author_id', authorId);
+
+    const select = document.getElementById('storySelect');
+    const storiesList = document.getElementById('myStories'); // The div currently stuck on 'Loading...'
+
+    if (error) {
+        storiesList.innerHTML = "Error loading stories: " + error.message;
+        return;
+    }
+
+    if (stories && stories.length > 0) {
+        // 1. Update Dropdown
+        select.innerHTML = '<option value="new">+ Start a Brand New Story</option>';
+        
+        // 2. Update the Visual List
+        storiesList.innerHTML = ""; // Clear the 'Loading...' message
+
+        stories.forEach(s => {
+            // Add to dropdown
+            select.innerHTML += `<option value="${s.id}">${s.title}</option>`;
+
+            // Add to the visual list on the page
+            storiesList.innerHTML += `
+                <div class="card story-card">
+                    <h4>${s.title}</h4>
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <button onclick="editStory('${s.id}', '${s.title}', '${s.content}')" style="background: #667eea; width: auto;">Edit</button>
+                        <button onclick="deleteStory('${s.id}')" style="background: #ff4b2b; width: auto;">Delete</button>
+                    </div>
+                </div>
+            `;
+        });
+    } else {
+        storiesList.innerHTML = "You haven't published any stories yet.";
+    }
+}
+
+
+async function publishChapter() {
+    const storySelect = document.getElementById('storySelect').value;
+    const storyTitle = document.getElementById('storyTitle').value;
+    const chapterTitle = document.getElementById('chapterTitle').value;
+    const content = document.getElementById('storyContent').value;
+
+    if (!chapterTitle || !content) return alert("Please fill in the chapter details!");
+
+    let finalStoryId = storySelect;
+
+    // IF NEW STORY: Create the story entry first
+    if (storySelect === 'new') {
+        if (!storyTitle) return alert("Please give your new story a title!");
+        
+        // FIX: We create a summary for the 'content' column of the 'stories' table
+        // so it isn't null. We use the first 200 characters of the chapter content.
+        const storySummary = content.substring(0, 200);
+
+        const { data: newStory, error: sErr } = await supabaseClient
+            .from('stories')
+            .insert([{ 
+                title: storyTitle, 
+                author_id: currentUser.id,
+                content: storySummary // Added this to satisfy the NOT NULL constraint
+            }])
+            .select()
+            .single();
+
+        if (sErr) return alert("Story Error: " + sErr.message);
+        finalStoryId = newStory.id;
+    }
+
+    // NOW: Insert the chapter linked to that story ID
+    const { error: cErr } = await supabaseClient
+        .from('chapters')
+        .insert([{ 
+            story_id: finalStoryId, 
+            title: chapterTitle, 
+            content: content 
+        }]);
+
+    if (cErr) {
+        alert("Chapter Error: " + cErr.message);
+    } else {
+        alert("Success! Your chapter is live.");
+        location.reload(); 
+    }
+}
+
+
+
+      // 4. Improved Delete Story Logic
+    window.deleteStory = async function(storyId) {
+        if (!confirm("Are you sure you want to delete this story?")) return;
+
+        const { error } = await supabaseClient
+            .from('stories')
+            .delete()
+            .eq('id', storyId);
+
+        if (error) {
+            console.error("Delete Error:", error);
+            alert("Delete failed: " + error.message + "\n\nTip: Check if RLS policies are enabled in Supabase.");
+        } else {
+            alert("Story deleted!");
+            // Refresh the list using the stored current user ID
+            fetchMyStories(currentUser.id); 
+        }
+    };
+
+    // 5. Improved Edit Story Logic
+    window.editStory = async function(storyId, oldTitle, oldContent) {
+        const newTitle = prompt("Edit Title:", oldTitle);
+        const newContent = prompt("Edit Content:", oldContent);
+
+        if (!newTitle || !newContent) return;
+
+        const { error } = await supabaseClient
+            .from('stories')
+            .update({ title: newTitle, content: newContent })
+            .eq('id', storyId);
+
+        if (error) {
+            console.error("Update Error:", error);
+            alert("Update failed: " + error.message);
+        } else {
+            alert("Story updated!");
+            fetchMyStories(currentUser.id);
+        }
+    };
+
+
+    async function logout() {
+        await supabaseClient.auth.signOut();
+        window.location.href = "index.html";
+    }
+</script>
+
+
+<script type="module" src="main.js"></script>
+</body>
+</html>

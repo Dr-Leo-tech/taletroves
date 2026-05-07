@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2W62NFYZJ3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-2W62NFYZJ3');
+</script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Public Feed - Tale Trove</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="main.css">
+    <style>
+/* Updated Styles for Stories.html */
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column; /* Stack header, content, and footer vertically */
+    font-family: 'Segoe UI', sans-serif;
+    background: #f0f2f5;
+}
+
+
+.js-footer {
+    margin-top: auto; /* Extra insurance to keep footer at the bottom */
+}
+        .nav { background: #764ba2; color: white; padding: 15px; display: flex; justify-content: space-between; border-radius: 8px; margin-bottom: 20px; }
+        .nav a { color: white; text-decoration: none; font-weight: bold; }
+    
+    /* The Grid Layout for cards */
+    .stories-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsive grid */
+        gap: 25px;
+        padding: 20px 0;
+    }
+
+    .story-card { 
+        background: white; 
+        padding: 20px; 
+        border-radius: 12px; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: transform 0.2s ease-in-out;
+        border-top: 5px solid #0066ff; /* Accent color matching your theme */
+    }
+
+    .story-card:hover { 
+        transform: translateY(-5px); 
+        box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    }
+
+    .story-title { 
+        color: #667eea; 
+        margin: 0 0 10px 0; 
+        font-size: 1.4em; 
+        font-weight: bold;
+    }
+
+    .story-author { 
+        font-size: 0.85em; 
+        color: #888; 
+        margin-bottom: 12px;
+    }
+
+    .story-preview { 
+        font-size: 0.95em;
+        line-height: 1.5; 
+        color: #444; 
+        margin-bottom: 20px;
+        flex-grow: 1; /* Pushes the button to the bottom */
+    }
+
+    .read-btn { 
+        display: block;
+        text-align: center;
+        background: #667eea; 
+        color: white; 
+        padding: 10px; 
+        text-decoration: none; 
+        border-radius: 6px; 
+        font-weight: bold;
+        font-size: 0.9em;
+    }
+</style>
+
+<body>
+  <div class="js-header"></div>
+
+  <div class="container">
+      <h1>Latest Stories 📖</h1>
+      <div id="publicFeed" class="stories-grid">Gathering stories...</div>
+  </div>
+
+<!-- FOOTER -->
+  <div class="js-footer"></div>
+
+<script>
+    const supabaseUrl = 'https://oadbiabeqavrvtymcvuv.supabase.co';
+    const supabaseKey = 'sb_publishable_cQvpBFh00y0lujudlGhlJQ_ltN3ltN7';
+    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+    async function loadFeed() {
+    try {
+        // Fetch stories with the count of related likes and comments
+        const { data, error } = await supabaseClient
+            .from('stories')
+            .select(`
+                id, 
+                title, 
+                content, 
+                profiles(username),
+                likes(count),
+                comments(count)
+            `)
+            .order('created_at', { ascending: false });
+
+        const feed = document.getElementById('publicFeed');
+        if (error) throw error;
+
+        feed.innerHTML = data.map(story => {
+            // Extract counts safely
+            const likeCount = story.likes?.[0]?.count || 0;
+            const commentCount = story.comments?.[0]?.count || 0;
+
+            return `
+                <div class="story-card">
+                    <div>
+                        <h2 class="story-title">${story.title}</h2>
+                        <p class="story-author">By ${story.profiles?.username || 'Unknown Author'}</p>
+                        <p class="story-preview">${story.content.substring(0, 120)}...</p>
+                        <div style="margin-bottom: 15px; font-size: 0.9em; color: #764ba2;">
+                            <span style="margin-right: 15px;">❤️ ${likeCount}</span>
+                            <span>💬 ${commentCount}</span>
+                        </div>
+                    </div>
+                    <a href="story.html?id=${story.id}" class="read-btn">Read Full Story →</a>
+                </div>
+            `;
+        }).join('');
+    } catch (err) {
+        console.error("Feed error:", err);
+    }
+}
+
+    window.onload = loadFeed;
+</script>
+
+
+<script type="module" src="main.js"></script>
+</body>
+</html>

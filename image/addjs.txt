@@ -1,0 +1,46 @@
+const stories = [
+  {
+    title: "The Lost Kingdom",
+    img: "Image/tlk.jpeg",
+    text: "A thrilling adventure through a forgotten land.",
+    fullStory: "Once, there was a kingdom hidden behind the clouds..." // Add full text here
+  },
+  {
+    title: "Mystery Of The Old Lighthouse",
+    img: "Image/motolh.jpeg",
+    text: "An eerie tale full of secrets.",
+    fullStory: "The lighthouse stood tall against the crashing waves..." // Add full text here
+  },
+  // Do the same for 'Journey To The Stars' and 'The New Keeper'
+];
+
+
+// Add these to your list of elements at the top
+const fullStoryEl = document.getElementById("full-story-content");
+const readMoreBtn = document.getElementById("read-more-btn");
+
+function showStory(index) {
+  const story = stories[index];
+  titleEl.textContent = story.title;
+  imgEl.src = story.img;
+  textEl.textContent = story.text;
+  
+  // Set the full story text but keep it hidden for now
+  fullStoryEl.textContent = story.fullStory;
+  fullStoryEl.style.display = "none"; 
+  readMoreBtn.textContent = "Read Full Story";
+
+  prevBtn.disabled = index === 0;
+  nextBtn.disabled = index === stories.length - 1;
+}
+
+// Add a click event for the Read More button
+readMoreBtn.addEventListener("click", () => {
+  if (fullStoryEl.style.display === "none") {
+    fullStoryEl.style.display = "block";
+    readMoreBtn.textContent = "Show Less";
+  } else {
+    fullStoryEl.style.display = "none";
+    readMoreBtn.textContent = "Read Full Story";
+  }
+});

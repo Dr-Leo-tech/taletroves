@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="main.css">
+ <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2W62NFYZJ3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-2W62NFYZJ3');
+</script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>Tale Trove - Reading</title>
+    <style>
+        .reader-container { max-width: 700px; margin: 50px auto; padding: 20px; line-height: 1.8; }
+        .chapter-content { font-size: 1.2rem; color: #333; white-space: pre-wrap; margin-bottom: 40px; }
+        
+        /* Navigation Styling */
+        .navigation-links { 
+            display: flex; 
+            justify-content: space-between; 
+            margin-top: 50px; 
+            border-top: 1px solid #eee; 
+            padding-top: 20px; 
+        }
+        .btn-nav { 
+            text-decoration: none; 
+            color: #667eea; 
+            font-weight: bold; 
+            padding: 10px 15px;
+            border: 1px solid #667eea;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+        .btn-nav:hover { background: #667eea; color: white; }
+        .btn-nav.disabled { color: #ccc; border-color: #ccc; pointer-events: none; }
+    </style>
+</head>
+<body>
+    <div class="js-header"></div>
+
+    <main class="reader-container">
+        <h1 id="chTitle">Loading Chapter...</h1>
+        <hr>
+        <div id="chContent" class="chapter-content">
+            Unrolling the parchment...
+        </div>
+
+        <div class="navigation-links">
+            <a id="prevBtn" href="#" class="btn-nav">← Previous</a>
+            <a href="javascript:void(0)" onclick="goToIndex()" class="btn-nav">Table of Contents</a>
+            <a id="nextBtn" href="#" class="btn-nav">Next →</a>
+        </div>
+    </main>
+
+    <div class="js-footer"></div>
+
+    <script>
+        const supabaseUrl = 'https://oadbiabeqavrvtymcvuv.supabase.co';
+        const supabaseKey = 'sb_publishable_cQvpBFh00y0lujudlGhlJQ_ltN3ltN7';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        let currentStoryId = null;
+
+        async function loadChapter() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const chapterId = urlParams.get('id');
+
+            if (!chapterId) {
+                window.location.href = "Stories.html";
+                return;
+            }
+
+            // 1. Get current chapter and its story_id
+            const { data: chapter, error } = await supabaseClient
+                .from('chapters')
+                .select('title, content, story_id, created_at')
+                .eq('id', chapterId)
+                .single();
+
+            if (error || !chapter) {
+                document.getElementById('chContent').innerText = "Error loading chapter.";
+                return;
+            }
+
+            document.getElementById('chTitle').innerText = chapter.title;
+            document.getElementById('chContent').innerText = chapter.content;
+            currentStoryId = chapter.story_id;
+
+            // 2. Setup Navigation
+            setupNavigation(chapter.story_id, chapter.created_at);
+        }
+
+        async function setupNavigation(storyId, currentCreatedAt) {
+            // Fetch all chapters for this story in order
+            const { data: chapters } = await supabaseClient
+                .from('chapters')
+                .select('id')
+                .eq('story_id', storyId)
+                .order('created_at', { ascending: true });
+
+            if (!chapters) return;
+
+            const currentIndex = chapters.findIndex(c => c.id === new URLSearchParams(window.location.search).get('id'));
+
+            // Handle Previous Button
+            const prevBtn = document.getElementById('prevBtn');
+            if (currentIndex > 0) {
+                prevBtn.href = `ReadChapter.html?id=${chapters[currentIndex - 1].id}`;
+            } else {
+                prevBtn.classList.add('disabled');
+            }
+
+            // Handle Next Button
+            const nextBtn = document.getElementById('nextBtn');
+            if (currentIndex < chapters.length - 1) {
+                nextBtn.href = `ReadChapter.html?id=${chapters[currentIndex + 1].id}`;
+            } else {
+                nextBtn.classList.add('disabled');
+            }
+        }
+
+        function goToIndex() {
+            if (currentStoryId) {
+                window.location.href = `Story.html?id=${currentStoryId}`;
+            } else {
+                window.location.href = "Stories.html";
+            }
+        }
+
+        window.onload = loadChapter;
+    </script>
+ <script type="module" src="main.js">
+</script>
+</body>
+</html>

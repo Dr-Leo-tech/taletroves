@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2W62NFYZJ3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-2W62NFYZJ3');
+</script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="main.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>Tale Trove - Read Story</title>
+    <style>
+        .story-container { max-width: 800px; margin: 40px auto; padding: 20px; }
+        .chapter-list { margin-top: 30px; }
+        .chapter-link { 
+            display: block; 
+            padding: 15px; 
+            background: white; 
+            margin-bottom: 10px; 
+            border-radius: 8px; 
+            text-decoration: none; 
+            color: #333; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: 0.2s;
+        }
+        .chapter-link:hover { transform: translateX(10px); color: #667eea; }
+        .back-link { display: inline-block; margin-bottom: 20px; color: #667eea; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="js-header"></div>
+
+    <div class="story-container">
+        <a href="Stories.html" class="back-link">← Back to Library</a>
+        <h1 id="storyTitle">Loading story...</h1>
+        <p id="storyMeta" style="color: #666; font-style: italic;"></p>
+   <div class="interaction-bar">
+    <button class="action-btn" onclick="handleInteraction('like')">❤️ Like</button>
+    <button class="action-btn" onclick="handleInteraction('comment')">💬 Comment</button>
+</div>
+        
+        <div class="chapter-list" id="chapterList">
+            </div>
+    </div>
+
+    <div class="js-footer"></div>
+
+    <script>
+        const supabaseUrl = 'https://oadbiabeqavrvtymcvuv.supabase.co';
+        const supabaseKey = 'sb_publishable_cQvpBFh00y0lujudlGhlJQ_ltN3ltN7';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+  async function loadStoryData() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const storyId = urlParams.get('id')?.trim(); // Trim prevents accidental spaces
+
+    if (!storyId) {
+        console.error("No story ID found in URL");
+        window.location.href = "stories.html";
+        return;
+    }
+
+    console.log("Fetching data for Story ID:", storyId);
+
+    // 1. Fetch Story Details
+    const { data: story, error: sErr } = await supabaseClient
+        .from('stories')
+        .select('title')
+        .eq('id', storyId)
+        .single();
+
+    if (story) {
+        document.getElementById('storyTitle').innerText = story.title;
+    } else if (sErr) {
+        console.error("Story Fetch Error:", sErr.message);
+    }
+
+    // 2. Fetch Chapters
+    const { data: chapters, error: cErr } = await supabaseClient
+        .from('chapters')
+        .select('id, title, created_at')
+        .eq('story_id', storyId)
+        .order('created_at', { ascending: true });
+
+    const list = document.getElementById('chapterList');
+    
+    if (cErr) {
+        console.error("Chapter Fetch Error:", cErr.message);
+        list.innerHTML = `<p style="color:red;">Database Error: ${cErr.message}</p>`;
+        return;
+    }
+
+    if (chapters && chapters.length > 0) {
+        list.innerHTML = chapters.map((ch, index) => `
+            <a href="readchapter.html?id=${ch.id}" class="chapter-link">
+                <strong>Chapter ${index + 1}:</strong> ${ch.title}
+            </a>
+        `).join('');
+    } else {
+        // If chapters are empty, check if RLS is the problem
+        list.innerHTML = `
+            <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border: 1px solid #ffeeba;">
+                <p><strong>No chapters found.</strong></p>
+                <p style="font-size: 0.8em;">If you see chapters in Supabase, make sure you have added a <b>SELECT</b> policy for the 'chapters' table.</p>
+            </div>
+        `;
+    }
+}
+
+
+   async function handleInteraction(type) {
+        // Check if a user is logged in
+        const { data: { user } } = await supabaseClient.auth.getUser();
+
+        if (!user) {
+            // Action for Guests
+            alert(`Sign up for Tale Trove to ${type} on this story!`);
+            window.location.href = "index.html";
+            return;
+        }
+
+        // Action for Logged-in Users
+        if (type === 'like') {
+            await submitLike(user.id);
+        } else {
+            // Open your comment modal or scroll to comment section
+            alert("Comment section coming soon for logged-in users!");
+        }
+    }
+
+    async function submitLike(userId) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const storyId = urlParams.get('id');
+
+        const { error } = await supabaseClient
+            .from('likes')
+            .insert([{ user_id: userId, story_id: storyId }]);
+
+        if (error) {
+            if (error.code === '23505') alert("You already liked this story!");
+            else console.error(error);
+        } else {
+            alert("Story Liked!");
+            location.reload(); // Refresh to update count
+        }
+    }
+
+        window.onload = loadStoryData;
+    </script>
+ <script type="module" src="main.js">
+</script>
+</body>
+</html>
+
+
+    

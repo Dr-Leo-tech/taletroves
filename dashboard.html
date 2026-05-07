@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2W62NFYZJ3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-2W62NFYZJ3');
+</script>
+
+  <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="main.css">
+    
+  <title>User Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <style>
+   .container {
+  width: 90%;          /* Mobile friendly */
+  max-width: 1000px;   /* Expands on desktop */
+  margin: 20px auto;
+  padding: 20px;
+}
+.card {
+  background: white;
+  padding: 30px;       /* More breathing room for desktop */
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
+
+    button {
+      padding: 8px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background: #e74c3c;
+      color: white;
+    }
+    button:hover { background: #c0392b; }
+  </style>
+</head>
+<body>
+  <!-- HEADER -->
+<div class="js-header"></div>
+
+<div class="container">
+  <div class="card">
+    <h3>Welcome 👋 </h3>
+    <p id="userInfo"></p>
+  </div>
+
+  <div class="card">
+    <h3>Account Info</h3>
+
+    <p><strong>Username:</strong> <span id="dUsername"></span></p>
+    <p><strong>Email:</strong> <span id="dEmail"></span></p>
+    <p><strong>Date of Birth:</strong> <span id="dDob"></span></p>
+    <p><strong>Gender:</strong> <span id="dGender"></span></p>
+  </div>
+  <div class="card">
+    <p><strong>Status:</strong> Active</p>
+</div>
+
+<div style="display: flex; justify-content: center;">
+  <button onclick="logout()">Logout</button>
+</div>
+
+<!-- FOOTER -->
+<br><br><br><br><br><br><br><br><br><br><br><br>
+<footer>
+  <p>© 2025 TaleTrove . <br> <br>
+  <a href="#">Privacy Policy</a> .
+  <a href="#">Terms of Service</a> .
+  <a href="#">Contact</a> .
+  </p>
+  <p>Follow us on
+    <a href="#">Twitter</a>,
+    <a href="#">Facebook</a>,
+    <a href="#">Instagram</a>
+  </p>
+</footer>
+  
+<script>
+document.addEventListener("DOMContentLoaded", async function () {
+  const supabaseUrl = 'https://oadbiabeqavrvtymcvuv.supabase.co';
+  const supabaseKey = 'sb_publishable_cQvpBFh00y0lujudlGhlJQ_ltN3ltN7';
+  
+  if (typeof supabase === 'undefined') {
+    alert("Database library blocked. Please turn off Data Saver/Ad-blockers.");
+    return;
+  }
+
+  const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+  // 1. SECURITY CHECK: Is user logged in?
+  const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+
+  if (userError || !user) {
+    window.location.href = "index.html"; // Send back to login
+    return;
+  }
+
+  // 2. FETCH PROFILE DATA
+  // We use 'profiles' (lowercase) and match on 'id'
+  const { data: profile, error: profileError } = await supabaseClient
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+
+  // 3. HANDLE REDIRECTION (If user is an author)
+  const role = profile?.role || user.user_metadata.role || 'reader';
+  if (role === "author") {
+    window.location.href = "author-dashboard.html";
+    return;
+  }
+
+  // 4. DISPLAY DATA
+  // Use metadata as a backup if the profiles table fetch is slow
+  const username = profile?.username || user.user_metadata.display_name || "User";
+  const dob = profile?.dob || user.user_metadata.dob || "N/A";
+  const gender = profile?.gender || user.user_metadata.gender || "N/A";
+
+  document.getElementById("userInfo").innerHTML = `Logged in as <strong>${username}</strong>`;
+  document.getElementById("dUsername").innerText = username;
+  document.getElementById("dEmail").innerText = user.email;
+  document.getElementById("dDob").innerText = dob;
+  document.getElementById("dGender").innerText = gender;
+
+  // 5. LOGOUT LOGIC
+  window.logout = async function() {
+    await supabaseClient.auth.signOut();
+    window.location.href = "index.html";
+  };
+});
+</script>
+
+<script type="module" src="main.js"></script>
+</body>
+</html>
