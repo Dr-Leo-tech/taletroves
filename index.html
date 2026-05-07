@@ -12,10 +12,8 @@
 </script>
 
   <meta charset="UTF-8" />
- <meta name="viewport" content="width=device-width, initial-scale=1” />
+ <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>Tale Trove</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
   <style>
     body {
@@ -70,6 +68,26 @@
       cursor: pointer;
     }
     .hidden { display: none; }
+
+    /* Loading spinner */
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
 
   a{
       text-decoration: none;
@@ -220,10 +238,10 @@
     <input type="checkbox" id="isAuthor">
     Register as Author
   </label>
-  <button onclick="signup()">Sign Up</button>
+  <button onclick="signup()" id="signupBtn">Sign Up</button>
   <div class="link" onclick="showLogin()">Already have an account?</div>
   <br>
-  <a href="Guest.html"><div class="guest">Continue as Guest</div></a>
+  <a href="guest.html"><div class="guest">Continue as Guest</div></a>
 </div>
 
 <!-- LOGIN -->
@@ -233,10 +251,10 @@
   <input type="email" id="liEmail" placeholder="Email"  required/>
   <input type="password" id="liPassword" placeholder="Password" required/>
   </div>
-  <button onclick="login()">Login</button>
+  <button onclick="login()" id="loginBtn">Login</button>
   <div class="link" onclick="showSignup()">Create account</div>
   <br>
-  <a href="Guest.html"><div class="guest">Continue as Guest</div></a>
+  <a href="guest.html"><div class="guest">Continue as Guest</div></a>
 </div>
 
 <!-- DASHBOARD -->
@@ -248,88 +266,63 @@
 
 
 <script>
-  // 1. Initialize Supabase
   const supabaseUrl = 'https://oadbiabeqavrvtymcvuv.supabase.co';
   const supabaseKey = 'sb_publishable_cQvpBFh00y0lujudlGhlJQ_ltN3ltN7';
+
+  // Declared here so all functions can access it, initialized in window.onload
   let supabaseClient = null;
 
-  function initSupabase() {
-    if (typeof supabase !== 'undefined') {
-      supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-      return true;
-    }
-    return false;
+  // --- LOADING HELPER ---
+  function setLoading(btnId, isLoading, defaultText) {
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+    btn.disabled = isLoading;
+    btn.innerHTML = isLoading
+      ? `<span class="spinner"></span> Please wait...`
+      : defaultText;
   }
-
- window.onload = async () => {
-    const loader = document.getElementById("appLoader");
-
-    try {
-        // 1. Initialize Supabase
-        initSupabase();
-
-        // 2. Check session (Await this to prevent flickering)
-        // This checks if the user is already logged in and redirects if necessary
-        await checkUserSession();
-
-    } catch (err) {
-        console.error("Initialization error:", err);
-    } finally {
-        // 3. The 'finally' block ensures the loader is removed 
-        // even if the code above hits an error (prevents crashing).
-        if (loader) {
-            // Optional: Add a fade-out effect
-            loader.style.opacity = "0";
-            setTimeout(() => {
-                loader.style.display = "none";
-            }, 500); // Matches a 0.5s CSS transition
-        }
-    }
-};
-
 
   // --- AUTH LOGIC ---
   async function signup() {
-  if (!supabaseClient && !initSupabase()) return;
+    setLoading('signupBtn', true);
 
-  const email = document.getElementById('suEmail').value;
-  const password = document.getElementById('suPassword').value;
-  const username = document.getElementById('suUsername').value;
-  const dob = document.getElementById('suDob').value;
-  const gender = document.getElementById('suGender').value;
-  const isAuthor = document.getElementById('isAuthor').checked;
+    const email = document.getElementById('suEmail').value;
+    const password = document.getElementById('suPassword').value;
+    const username = document.getElementById('suUsername').value;
+    const dob = document.getElementById('suDob').value;
+    const gender = document.getElementById('suGender').value;
+    const isAuthor = document.getElementById('isAuthor').checked;
 
-  try {
-    const { data, error } = await supabaseClient.auth.signUp({
-      email,
-      password,
-      options: {
-        // This tells Supabase where to send the user AFTER they click confirm
-        emailRedirectTo: window.location.origin + '/home.html', 
-        data: { 
-          display_name: username, 
-          dob: dob, 
-          gender: gender, 
-          role: isAuthor ? 'author' : 'reader' 
+    try {
+      const { data, error } = await supabaseClient.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: window.location.origin + '/home.html',
+          data: {
+            display_name: username,
+            dob: dob,
+            gender: gender,
+            role: isAuthor ? 'author' : 'reader'
+          }
         }
+      });
+
+      if (error) {
+        alert(error.message);
+      } else {
+        alert("Signup successful! Please check your email to confirm your account before logging in.");
+        showLogin();
       }
-    });
-
-    if (error) {
-      alert(error.message);
-    } else {
-      // Important: Inform the user to check their email!
-      alert("Signup successful! Please check your email to confirm your account before logging in.");
-      showLogin();
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setLoading('signupBtn', false, 'Sign Up');
     }
-  } catch (err) { 
-    alert(err.message); 
   }
-}
-
 
   async function login() {
-    if (!supabaseClient && !initSupabase()) return;
+    setLoading('loginBtn', true);
 
     const email = document.getElementById('liEmail').value;
     const password = document.getElementById('liPassword').value;
@@ -338,18 +331,13 @@
       const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
       if (error) {
         alert("Login failed: " + error.message);
+        setLoading('loginBtn', false, 'Login');
       } else {
-        // REDIRECT TO DASHBOARD
         window.location.href = "home.html";
       }
-    } catch (err) { alert(err.message); }
-  }
-
-  async function checkUserSession() {
-    if (!supabaseClient && !initSupabase()) return;
-    const { data: { user } } = await supabaseClient.auth.getUser();
-    if (user) {
-      window.location.href = "home.html";
+    } catch (err) {
+      alert(err.message);
+      setLoading('loginBtn', false, 'Login');
     }
   }
 
@@ -363,28 +351,51 @@
     document.getElementById('signupBox').classList.remove('hidden');
   }
 
-function openDate(el){
-  el.type = "date";
-  // Small delay ensures the browser has rendered the type change before picking
-  setTimeout(() => {
-    el.showPicker && el.showPicker();
-  }, 10);
-}
+  function openDate(el) {
+    el.type = "date";
+    setTimeout(() => {
+      el.showPicker && el.showPicker();
+    }, 10);
+  }
 
-//logo loader
-window.addEventListener("load", function(){
-        
-        setTimeout(() => {
-          document.getElementById("loader").style.opacity="0";
-          document.getElementById("loader").style.transition="0.5s";
-          
-          setTimeout(() => {
-            document.getElementById("loader").style.display="none";
-          },500)
-        },2500)
-      })
+  // --- HIDE LOADER — runs immediately, independent of Supabase ---
+  // This guarantees the loader always disappears after 2.5s no matter what
+  function hideLoader() {
+    const loader = document.getElementById("loader");
+    if (!loader) return;
+    setTimeout(() => {
+      loader.style.transition = "opacity 0.5s";
+      loader.style.opacity = "0";
+      setTimeout(() => { loader.style.display = "none"; }, 500);
+    }, 2500);
+  }
+  hideLoader();
+
+  // --- ON PAGE LOAD ---
+  // Poll until supabase global is ready (handles slow CDN loads)
+  function waitForSupabase(callback) {
+    if (typeof supabase !== 'undefined') {
+      callback();
+    } else {
+      setTimeout(() => waitForSupabase(callback), 50);
+    }
+  }
+
+  waitForSupabase(async () => {
+    supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+    try {
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if (user) {
+        window.location.href = "home.html";
+      }
+    } catch (err) {
+      console.error("Session check error:", err);
+    }
+  });
 </script>
 
+<!-- Supabase loaded at end of body so it never blocks page render -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 </body>
 </html>

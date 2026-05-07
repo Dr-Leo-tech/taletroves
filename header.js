@@ -36,6 +36,3 @@ export function readerHeader(){
       document.getElementById("main").style.marginLeft= "0";
     });
 }
-
-
-readerHeader();
