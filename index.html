@@ -319,8 +319,8 @@
         alert("Signup successful! Please check your email to confirm your account before logging in.");
         showLogin();
       }
-    } catch (err) {
-      alert(err.message);
+   } catch (err) {
+  alert(err.message || err.toString() || "An unexpected error occurred.");
     } finally {
       setLoading('signupBtn', false, 'Sign Up');
     }
@@ -346,8 +346,7 @@
         window.location.href = "home.html";
       }
     } catch (err) {
-      alert(err.message);
-      setLoading('loginBtn', false, 'Login');
+  alert(err.message || err.toString() || "An unexpected error occurred.");
     }
   }
 
