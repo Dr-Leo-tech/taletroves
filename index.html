@@ -318,7 +318,7 @@
         showLogin();
       }
    } catch (err) {
-  alert(err.message || err.toString() || "An unexpected error occurred.");
+  alert(JSON.stringify(err) + " | " + err.message + " | " + err.toString());
     } finally {
       setLoading('signupBtn', false, 'Sign Up');
     }
