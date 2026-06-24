@@ -284,13 +284,11 @@
 
   // --- AUTH LOGIC ---
   async function signup() {
-  if (!supabaseClient) {
-    alert("App is still loading. Please wait a moment and try again.");
-    return;
-  }
-
-  setLoading('signupBtn', true);
-
+    if (!supabaseClient) {
+      alert("App is still loading. Please wait a moment and try again.");
+      return;
+    }
+    setLoading('signupBtn', true);
     const email = document.getElementById('suEmail').value;
     const password = document.getElementById('suPassword').value;
     const username = document.getElementById('suUsername').value;
@@ -327,13 +325,11 @@
   }
 
   async function login() {
-  if (!supabaseClient) {
-    alert("App is still loading. Please wait a moment and try again.");
-    return;
-  }
-
-  setLoading('loginBtn', true);
-
+    if (!supabaseClient) {
+      alert("App is still loading. Please wait a moment and try again.");
+      return;
+    }
+    setLoading('loginBtn', true);
     const email = document.getElementById('liEmail').value;
     const password = document.getElementById('liPassword').value;
 
