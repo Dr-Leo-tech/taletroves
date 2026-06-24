@@ -312,7 +312,7 @@
       });
 
       if (error) {
-        alert(error.message);
+        alert(error.message || error.msg || JSON.stringify(error) || "Signup failed. Please try again.");
       } else {
         alert("Signup successful! Please check your email to confirm your account before logging in.");
         showLogin();
