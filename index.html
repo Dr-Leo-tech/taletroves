@@ -312,8 +312,15 @@
       });
 
       if (error) {
-        alert(error.message || error.msg || JSON.stringify(error) || "Signup failed. Please try again.");
-      } else {
+  const details = [];
+  details.push("message: " + error.message);
+  details.push("status: " + error.status);
+  details.push("name: " + error.name);
+  details.push("code: " + error.code);
+  details.push("details: " + error.details);
+  details.push("hint: " + error.hint);
+  alert(details.join("\n"));
+  } else {
         alert("Signup successful! Please check your email to confirm your account before logging in.");
         showLogin();
       }
