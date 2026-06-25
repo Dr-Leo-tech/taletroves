@@ -267,7 +267,7 @@
 
 <script>
   const supabaseUrl = 'https://oadbiabeqavrvtymcvuv.supabase.co';
-  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9hZGJpYWJlcWF2cnZ0eW1jdnV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4NjIwNDIsImV4cCI6MjA4NzQzODA0Mn0.F1lN2GkQTInT2iHxpuFBy7nphWb_OndEEaxEsq4OcV4';
+  const supabaseKey = 'sb_publishable_cQvpBFh00y0lujudlGhlJQ_ltN3ltN7';
 
   // Declared here so all functions can access it, initialized in window.onload
   let supabaseClient = null;
@@ -296,37 +296,45 @@
     const gender = document.getElementById('suGender').value;
     const isAuthor = document.getElementById('isAuthor').checked;
 
-    try {
-      const { data, error } = await supabaseClient.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: window.location.origin + '/home.html',
-          data: {
-            display_name: username,
-            dob: dob,
-            gender: gender,
-            role: isAuthor ? 'author' : 'reader'
-          }
-        }
+try {
+  const { data, error } = await supabaseClient.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: window.location.origin + '/home.html',
+      data: {
+        display_name: username,
+        dob: dob,
+        gender: gender,
+        role: isAuthor ? 'author' : 'reader'
+      }
+    }
+  });
+
+  if (error) {
+    alert(error.message || "Signup failed.");
+  } else {
+    // Manually insert profile row
+    const { error: profileError } = await supabaseClient
+      .from('profiles')
+      .insert({
+        id: data.user.id,
+        username: username,
+        dob: dob,
+        gender: gender,
+        role: isAuthor ? 'author' : 'reader'
       });
 
-      if (error) {
-  const details = [];
-  details.push("message: " + error.message);
-  details.push("status: " + error.status);
-  details.push("name: " + error.name);
-  details.push("code: " + error.code);
-  details.push("details: " + error.details);
-  details.push("hint: " + error.hint);
-  alert(details.join("\n"));
-  } else {
-        alert("Signup successful! Please check your email to confirm your account before logging in.");
-        showLogin();
-      }
-   } catch (err) {
-  alert(JSON.stringify(err) + " | " + err.message + " | " + err.toString());
-    } finally {
+    if (profileError) {
+      alert("Account created but profile setup failed: " + profileError.message);
+    } else {
+      alert("Signup successful! Please check your email to confirm your account.");
+      showLogin();
+    }
+  }
+} catch (err) {
+  alert(err.message || err.toString() || "An unexpected error occurred.");
+} finally {
       setLoading('signupBtn', false, 'Sign Up');
     }
   }
