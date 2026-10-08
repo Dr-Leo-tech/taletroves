@@ -99,7 +99,7 @@ body {
 <body>
   <div class="js-header"></div>
 
-  <div id="main" class="container">
+  <div class="container">
       <h1>Latest Stories 📖</h1>
       <div id="publicFeed" class="stories-grid">Gathering stories...</div>
   </div>
@@ -121,6 +121,7 @@ body {
                 id, 
                 title, 
                 content, 
+                author_id,
                 profiles(username),
                 likes(count),
                 comments(count)
@@ -139,7 +140,7 @@ body {
                 <div class="story-card">
                     <div>
                         <h2 class="story-title">${story.title}</h2>
-                        <p class="story-author">By ${story.profiles?.username || 'Unknown Author'}</p>
+                        <p class="story-author">By <a href="author.html?id=${story.author_id}" style="color:#667eea;text-decoration:none;">${story.profiles?.username || 'Unknown Author'}</a></p>
                         <p class="story-preview">${story.content.substring(0, 120)}...</p>
                         <div style="margin-bottom: 15px; font-size: 0.9em; color: #764ba2;">
                             <span style="margin-right: 15px;">❤️ ${likeCount}</span>

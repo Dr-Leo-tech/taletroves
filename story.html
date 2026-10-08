@@ -37,7 +37,7 @@
 <body>
     <div class="js-header"></div>
 
-    <div id="main" class="story-container">
+    <div class="story-container">
         <a href="Stories.html" class="back-link">← Back to Library</a>
         <h1 id="storyTitle">Loading story...</h1>
         <p id="storyMeta" style="color: #666; font-style: italic;"></p>
@@ -72,12 +72,16 @@
     // 1. Fetch Story Details
     const { data: story, error: sErr } = await supabaseClient
         .from('stories')
-        .select('title')
+        .select('title, author_id, profiles(username)')
         .eq('id', storyId)
         .single();
 
     if (story) {
         document.getElementById('storyTitle').innerText = story.title;
+        if (story.author_id) {
+            document.getElementById('storyMeta').innerHTML =
+                `By <a href="author.html?id=${story.author_id}" style="color:#667eea;text-decoration:none;">${story.profiles?.username || 'Unknown Author'}</a>`;
+        }
     } else if (sErr) {
         console.error("Story Fetch Error:", sErr.message);
     }
