@@ -32,6 +32,17 @@
         }
         .chapter-link:hover { transform: translateX(10px); color: #667eea; }
         .back-link { display: inline-block; margin-bottom: 20px; color: #667eea; text-decoration: none; }
+        .comments-section { margin-top: 40px; }
+        .comments-section h3 { color: #333; }
+        .comment-form textarea { width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-family: inherit; font-size: 1em; resize: vertical; }
+        .comment-form button { margin-top: 8px; background: #667eea; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .comment-form button:disabled { opacity: 0.6; }
+        .login-note { background: #f4f4f9; padding: 12px; border-radius: 8px; color: #555; }
+        .comment-item { background: white; padding: 12px 15px; border-radius: 10px; margin-top: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .comment-head { font-size: 0.85em; color: #888; margin-bottom: 4px; display: flex; justify-content: space-between; gap: 10px; }
+        .comment-head a { color: #667eea; font-weight: bold; text-decoration: none; }
+        .comment-body { white-space: pre-wrap; word-break: break-word; color: #333; }
+        .comment-del { background: none; border: none; color: #c0392b; cursor: pointer; font-size: 0.85em; }
     </style>
 </head>
 <body>
@@ -48,6 +59,12 @@
         
         <div class="chapter-list" id="chapterList">
             </div>
+
+        <div class="comments-section" id="commentsSection">
+            <h3 id="commentsHeading">💬 Comments</h3>
+            <div id="commentFormBox"></div>
+            <div id="commentList">Loading comments...</div>
+        </div>
     </div>
 
     <div class="js-footer"></div>
@@ -134,8 +151,8 @@
         if (type === 'like') {
             await submitLike(user.id);
         } else {
-            // Open your comment modal or scroll to comment section
-            alert("Comment section coming soon for logged-in users!");
+            document.getElementById('commentsSection').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('commentInput')?.focus();
         }
     }
 
@@ -156,7 +173,101 @@
         }
     }
 
-        window.onload = loadStoryData;
+    // ---------- COMMENTS ----------
+    let commentUser = null;
+    const getStoryId = () => new URLSearchParams(window.location.search).get('id')?.trim();
+
+    async function loadComments() {
+        const storyId = getStoryId();
+        const list = document.getElementById('commentList');
+        const formBox = document.getElementById('commentFormBox');
+
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        commentUser = user;
+
+        if (user) {
+            formBox.innerHTML = `
+                <div class="comment-form">
+                    <textarea id="commentInput" rows="3" maxlength="500" placeholder="Write a comment..."></textarea>
+                    <button id="commentBtn" onclick="postComment()">Post Comment</button>
+                </div>`;
+        } else {
+            formBox.innerHTML = `<div class="login-note">Please <a href="index.html">log in</a> to comment.</div>`;
+        }
+
+        const { data: comments, error } = await supabaseClient
+            .from('comments')
+            .select('id, user_id, content, created_at')
+            .eq('story_id', storyId)
+            .order('created_at', { ascending: false });
+
+        if (error) { list.innerHTML = `<p style="color:red;">Could not load comments: ${error.message}</p>`; return; }
+
+        document.getElementById('commentsHeading').innerText = `💬 Comments (${comments.length})`;
+        if (!comments.length) { list.innerHTML = '<p style="color:#888;">No comments yet. Be the first!</p>'; return; }
+
+        // Look up usernames for the commenters
+        const ids = [...new Set(comments.map(c => c.user_id))];
+        const { data: profs } = await supabaseClient.from('profiles').select('id, username').in('id', ids);
+        const names = Object.fromEntries((profs || []).map(p => [p.id, p.username]));
+
+        list.innerHTML = '';
+        comments.forEach(c => {
+            const item = document.createElement('div');
+            item.className = 'comment-item';
+
+            const head = document.createElement('div');
+            head.className = 'comment-head';
+
+            const left = document.createElement('span');
+            const nameLink = document.createElement('a');
+            nameLink.href = `author.html?id=${c.user_id}`;
+            nameLink.textContent = names[c.user_id] || 'Reader';
+            left.append(nameLink, ' · ' + new Date(c.created_at).toLocaleDateString());
+            head.appendChild(left);
+
+            if (commentUser && commentUser.id === c.user_id) {
+                const del = document.createElement('button');
+                del.className = 'comment-del';
+                del.textContent = 'Delete';
+                del.onclick = () => deleteComment(c.id);
+                head.appendChild(del);
+            }
+
+            const body = document.createElement('div');
+            body.className = 'comment-body';
+            body.textContent = c.content;
+
+            item.append(head, body);
+            list.appendChild(item);
+        });
+    }
+
+    async function postComment() {
+        const input = document.getElementById('commentInput');
+        const btn = document.getElementById('commentBtn');
+        const text = input.value.trim();
+        if (!text) return;
+
+        btn.disabled = true;
+        const { error } = await supabaseClient
+            .from('comments')
+            .insert([{ story_id: getStoryId(), user_id: commentUser.id, content: text }]);
+        btn.disabled = false;
+
+        if (error) { alert('Could not post comment: ' + error.message); return; }
+        input.value = '';
+        loadComments();
+    }
+
+    async function deleteComment(id) {
+        if (!confirm('Delete this comment?')) return;
+        const { error } = await supabaseClient.from('comments').delete().eq('id', id);
+        if (error) { alert('Could not delete: ' + error.message); return; }
+        loadComments();
+    }
+
+        window.onload = () => { loadStoryData(); loadComments(); };
     </script>
  <script type="module" src="main.js">
 </script>
