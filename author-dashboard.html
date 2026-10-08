@@ -17,6 +17,7 @@
     
   <title>User Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
     <style>
    
@@ -63,26 +64,6 @@
         width: 100%; /* Makes the button easy to tap on mobile */
     }
 
-    /* Loading spinner */
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    .spinner {
-      display: inline-block;
-      width: 14px;
-      height: 14px;
-      border: 2px solid rgba(255,255,255,0.4);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      vertical-align: middle;
-      margin-right: 6px;
-    }
-    button:disabled {
-      opacity: 0.7;
-      cursor: not-allowed;
-    }
-
     .logout-btn { 
         background: #ff4b2b; 
         margin-top: 20px; 
@@ -106,6 +87,7 @@
 <div class="container">
     <h1>Author Dashboard ✍️</h1>
     <p id="welcomeMsg">Loading...</p>
+    <a id="publicProfileLink" href="#" style="display:none; margin-bottom:15px; padding:10px 16px; background:#667eea; color:white; text-decoration:none; border-radius:8px; font-weight:bold; font-size:0.9em;">👁️ View My Public Profile</a>
 
     <div class="card" style="background: #eef2f3; padding: 25px; border-radius: 12px;">
     <h3>Post a New Chapter 📖</h3>
@@ -152,16 +134,6 @@
 
     let currentUser = null;
 
-    // Loading helper — same pattern as Teloc
-    function setLoading(btnId, isLoading, defaultText = 'Publish to Tale Trove') {
-        const btn = document.getElementById(btnId);
-        if (!btn) return;
-        btn.disabled = isLoading;
-        btn.innerHTML = isLoading
-            ? `<span class="spinner"></span> Publishing...`
-            : defaultText;
-    }
-
     // 1. Initial Check & Data Load
     document.addEventListener("DOMContentLoaded", async () => {
         const { data: { user } } = await supabaseClient.auth.getUser();
@@ -187,6 +159,10 @@
 
         document.getElementById('welcomeMsg').innerHTML = `Welcome back, <strong>${profile.username}</strong>!`;
         
+        const profileLink = document.getElementById('publicProfileLink');
+        profileLink.href = `author.html?id=${user.id}`;
+        profileLink.style.display = 'inline-block';
+
         // FIXED: Passing the current user ID to the fetch function
         fetchMyStories(user.id); 
     });
@@ -248,17 +224,14 @@ async function publishChapter() {
 
     if (!chapterTitle || !content) return alert("Please fill in the chapter details!");
 
-    setLoading('publishBtn', true);
-
     let finalStoryId = storySelect;
 
     // IF NEW STORY: Create the story entry first
     if (storySelect === 'new') {
-        if (!storyTitle) {
-            setLoading('publishBtn', false);
-            return alert("Please give your new story a title!");
-        }
-
+        if (!storyTitle) return alert("Please give your new story a title!");
+        
+        // FIX: We create a summary for the 'content' column of the 'stories' table
+        // so it isn't null. We use the first 200 characters of the chapter content.
         const storySummary = content.substring(0, 200);
 
         const { data: newStory, error: sErr } = await supabaseClient
@@ -266,15 +239,12 @@ async function publishChapter() {
             .insert([{ 
                 title: storyTitle, 
                 author_id: currentUser.id,
-                content: storySummary
+                content: storySummary // Added this to satisfy the NOT NULL constraint
             }])
             .select()
             .single();
 
-        if (sErr) {
-            setLoading('publishBtn', false);
-            return alert("Story Error: " + sErr.message);
-        }
+        if (sErr) return alert("Story Error: " + sErr.message);
         finalStoryId = newStory.id;
     }
 
@@ -289,7 +259,6 @@ async function publishChapter() {
 
     if (cErr) {
         alert("Chapter Error: " + cErr.message);
-        setLoading('publishBtn', false);
     } else {
         alert("Success! Your chapter is live.");
         location.reload(); 

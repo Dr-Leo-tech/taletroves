@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Author - Tale Trove</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="main.css">
+    <style>
+        html, body { height: 100%; margin: 0; }
+        body { display: flex; flex-direction: column; font-family: 'Segoe UI', sans-serif; background: #f0f2f5; }
+        .js-footer { margin-top: auto; }
+        .container { max-width: 900px; width: 100%; margin: 0 auto; padding: 20px; box-sizing: border-box; }
+        .back-link { display: inline-block; margin-bottom: 15px; color: #667eea; text-decoration: none; }
+
+        .profile-card { background: white; border-radius: 16px; padding: 30px 20px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .avatar { width: 90px; height: 90px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; font-size: 2.4em; font-weight: bold; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; }
+        .profile-card h1 { margin: 0 0 4px; color: #333; }
+        .badge { color: #888; font-size: 0.9em; }
+        .stats { display: flex; justify-content: center; flex-wrap: wrap; gap: 30px; margin-top: 20px; }
+        .stat strong { display: block; font-size: 1.6em; color: #764ba2; }
+        .stat span { font-size: 0.85em; color: #888; }
+
+        h2.section { margin: 30px 0 5px; color: #333; }
+        .stories-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; padding: 15px 0; }
+        .story-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); display: flex; flex-direction: column; justify-content: space-between; border-top: 5px solid #0066ff; transition: transform 0.2s; }
+        .story-card:hover { transform: translateY(-5px); }
+        .story-title { color: #667eea; margin: 0 0 10px; font-size: 1.3em; }
+        .story-preview { font-size: 0.95em; line-height: 1.5; color: #444; flex-grow: 1; margin-bottom: 15px; }
+        .meta { margin-bottom: 15px; font-size: 0.9em; color: #764ba2; }
+        .meta span { margin-right: 15px; }
+        .read-btn { display: block; text-align: center; background: #667eea; color: white; padding: 10px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="js-header"></div>
+
+    <div class="container" id="main">
+        <a href="javascript:history.back()" class="back-link">← Back</a>
+
+        <div class="profile-card">
+            <div class="avatar" id="avatar">?</div>
+            <h1 id="authorName">Loading...</h1>
+            <div class="badge">✍️ Author</div>
+            <div class="stats">
+                <div class="stat"><strong id="storyCount">0</strong><span>Stories</span></div>
+                <div class="stat"><strong id="likeCount">0</strong><span>Total Likes</span></div>
+                <div class="stat"><strong id="commentCount">0</strong><span>Comments</span></div>
+            </div>
+        </div>
+
+        <h2 class="section">Stories by this author</h2>
+        <div id="authorStories" class="stories-grid">Loading stories...</div>
+    </div>
+
+    <div class="js-footer"></div>
+
+    <script>
+        const supabaseUrl = 'https://oadbiabeqavrvtymcvuv.supabase.co';
+        const supabaseKey = 'sb_publishable_cQvpBFh00y0lujudlGhlJQ_ltN3ltN7';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+        async function loadAuthor() {
+            const authorId = new URLSearchParams(window.location.search).get('id')?.trim();
+            if (!authorId) { window.location.href = 'stories.html'; return; }
+
+            // 1. Public stats (username + counts) from the author_stats view
+            const { data: stats, error: sErr } = await supabaseClient
+                .from('author_stats')
+                .select('username, total_stories, total_likes, total_comments')
+                .eq('author_id', authorId)
+                .maybeSingle();
+
+            if (sErr || !stats) {
+                document.getElementById('authorName').innerText = 'Author not found';
+                document.getElementById('authorStories').innerHTML = '';
+                return;
+            }
+
+            document.title = `${stats.username} - Tale Trove`;
+            document.getElementById('authorName').innerText = stats.username;
+            document.getElementById('avatar').innerText = stats.username.charAt(0).toUpperCase();
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (user && user.id === authorId) {
+                document.querySelector('.badge').insertAdjacentHTML('afterend',
+                    '<a href="author-dashboard.html" style="display:inline-block;margin-top:12px;color:#667eea;font-weight:bold;text-decoration:none;">⚙️ Go to my dashboard</a>');
+            }
+            document.getElementById('storyCount').innerText = stats.total_stories;
+            document.getElementById('likeCount').innerText = stats.total_likes;
+            document.getElementById('commentCount').innerText = stats.total_comments;
+
+            // 2. This author's stories
+            const { data: stories, error } = await supabaseClient
+                .from('stories')
+                .select('id, title, content, likes(count), comments(count)')
+                .eq('author_id', authorId)
+                .order('created_at', { ascending: false });
+
+            const grid = document.getElementById('authorStories');
+            if (error) { grid.innerHTML = `<p style="color:red;">${esc(error.message)}</p>`; return; }
+            if (!stories.length) { grid.innerHTML = '<p>No stories published yet.</p>'; return; }
+
+            grid.innerHTML = stories.map(s => `
+                <div class="story-card">
+                    <div>
+                        <h3 class="story-title">${esc(s.title)}</h3>
+                        <p class="story-preview">${esc((s.content || '').substring(0, 120))}...</p>
+                        <div class="meta">
+                            <span>❤️ ${s.likes?.[0]?.count || 0}</span>
+                            <span>💬 ${s.comments?.[0]?.count || 0}</span>
+                        </div>
+                    </div>
+                    <a href="story.html?id=${s.id}" class="read-btn">Read Story →</a>
+                </div>
+            `).join('');
+        }
+
+        window.onload = loadAuthor;
+    </script>
+    <script type="module" src="main.js"></script>
+</body>
+</html>
