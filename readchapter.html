@@ -43,8 +43,9 @@
 <body>
     <div class="js-header"></div>
 
-    <main id="main" class="reader-container">
+    <main class="reader-container">
         <h1 id="chTitle">Loading Chapter...</h1>
+        <p id="chAuthor" style="color:#666; font-style:italic; margin:0 0 10px;"></p>
         <hr>
         <div id="chContent" class="chapter-content">
             Unrolling the parchment...
@@ -90,6 +91,22 @@
             document.getElementById('chTitle').innerText = chapter.title;
             document.getElementById('chContent').innerText = chapter.content;
             currentStoryId = chapter.story_id;
+
+            // Author byline linking to the public profile
+            const { data: story } = await supabaseClient
+                .from('stories')
+                .select('author_id, profiles(username)')
+                .eq('id', chapter.story_id)
+                .single();
+
+            if (story && story.author_id) {
+                const byline = document.getElementById('chAuthor');
+                const link = document.createElement('a');
+                link.href = `author.html?id=${story.author_id}`;
+                link.textContent = story.profiles?.username || 'Unknown Author';
+                link.style.cssText = 'color:#667eea;text-decoration:none;';
+                byline.append('By ', link);
+            }
 
             // 2. Setup Navigation
             setupNavigation(chapter.story_id, chapter.created_at);
