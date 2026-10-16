@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-2W62NFYZJ3"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-2W62NFYZJ3');
+  </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact - Tale Trove</title>
+  <link rel="stylesheet" href="main.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      color: #333;
+    }
+
+    .contact-wrap {
+      max-width: 760px;
+      margin: 20px auto 40px;
+      display: grid;
+      gap: 20px;
+    }
+
+    .card {
+      background: #fff;
+      padding: 28px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      border-top: 5px solid #764ba2;
+    }
+
+    .card h1,
+    .card h2 {
+      color: #764ba2;
+      margin: 0 0 8px;
+    }
+
+    .card h1 { font-size: 2rem; }
+    .card h2 { font-size: 1.3rem; }
+
+    .intro {
+      margin: 0 0 20px;
+      line-height: 1.6;
+      color: #555;
+    }
+
+    .details {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 10px;
+    }
+
+    .details li {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .details .label {
+      font-weight: 600;
+      min-width: 90px;
+      color: #667eea;
+    }
+
+    .details .stack {
+      display: grid;
+      gap: 4px;
+    }
+
+    .details a {
+      color: #764ba2;
+      text-decoration: underline;
+      word-break: break-all;
+    }
+
+    form {
+      display: grid;
+      gap: 16px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    label {
+      font-weight: 600;
+      font-size: 0.95em;
+    }
+
+    input,
+    textarea {
+      font: inherit;
+      padding: 12px;
+      border: 1px solid #ccd0d9;
+      border-radius: 8px;
+      background: #fff;
+      color: #333;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    textarea {
+      min-height: 140px;
+      resize: vertical;
+    }
+
+    input:focus-visible,
+    textarea:focus-visible,
+    button:focus-visible,
+    a:focus-visible {
+      outline: 3px solid #764ba2;
+      outline-offset: 2px;
+    }
+
+    .hint {
+      font-size: 0.8em;
+      color: #888;
+      text-align: right;
+    }
+
+    /* Honeypot field: hidden from people, visible to simple spam bots */
+    .hp {
+      position: absolute;
+      left: -9999px;
+      height: 0;
+      overflow: hidden;
+    }
+
+    .send-btn {
+      background: linear-gradient(120deg, #667eea, #764ba2);
+      color: #fff;
+      border: none;
+      padding: 14px 20px;
+      font-size: 1.05em;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .send-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .status {
+      margin: 0;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 0.95em;
+      display: none;
+    }
+
+    .status.show { display: block; }
+    .status.ok { background: #e7f6ec; color: #1e6b3a; }
+    .status.err { background: #fdeaea; color: #a12626; }
+
+    @media (max-width: 480px) {
+      .contact-wrap { margin: 10px 0 30px; }
+      .card { padding: 22px 18px; }
+      .card h1 { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="js-header"></div>
+
+  <main id="main">
+    <div class="contact-wrap">
+
+      <section class="card">
+        <h1>Contact us</h1>
+        <p class="intro">Have a question, a bug to report, or feedback on TaleTrove? Send a message below or use the details here. We read every message.</p>
+
+        <ul class="details" id="details">
+          <li id="row-name"><span class="label">Name</span><span id="val-name"></span></li>
+          <li id="row-email"><span class="label">Email</span><span id="val-email" class="stack"></span></li>
+          <li id="row-whatsapp"><span class="label">WhatsApp</span><a id="val-whatsapp"></a></li>
+          <li id="row-location"><span class="label">Based in</span><span id="val-location"></span></li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>Send a message</h2>
+        <form id="contactForm" novalidate>
+          <div class="field">
+            <label for="cName">Your name</label>
+            <input id="cName" name="name" type="text" maxlength="100" autocomplete="name" required>
+          </div>
+
+          <div class="field">
+            <label for="cEmail">Your email</label>
+            <input id="cEmail" name="email" type="email" maxlength="254" autocomplete="email" required>
+          </div>
+
+          <div class="field">
+            <label for="cSubject">Subject (optional)</label>
+            <input id="cSubject" name="subject" type="text" maxlength="150">
+          </div>
+
+          <div class="field">
+            <label for="cMessage">Message</label>
+            <textarea id="cMessage" name="message" maxlength="2000" required></textarea>
+            <span class="hint"><span id="charCount">0</span> / 2000</span>
+          </div>
+
+          <!-- Honeypot: leave empty -->
+          <div class="hp" aria-hidden="true">
+            <label for="cWebsite">Website</label>
+            <input id="cWebsite" name="website" type="text" tabindex="-1" autocomplete="off">
+          </div>
+
+          <button type="submit" class="send-btn" id="sendBtn">Send message</button>
+          <p class="status" id="status" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+
+    </div>
+  </main>
+
+  <div class="js-footer"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // ============================================================
+    // EDIT YOUR CONTACT DETAILS HERE. Leave a value as "" to hide it.
+    // WhatsApp: digits only, with country code and no "+" (e.g. "2348012345678").
+    // ============================================================
+    const CONTACT = {
+      name: "Dr. Leo",
+      emails: ["taletrove211@gmail.com", "taletrove193@gmail.com"],
+      whatsapp: "2348051638706",
+      location: "Nigeria"
+    };
+
+    // ---------- Fill in the details block ----------
+    function showDetail(key, text, href) {
+      const row = document.getElementById('row-' + key);
+      const val = document.getElementById('val-' + key);
+      if (!text) { row.style.display = 'none'; return; }
+      val.textContent = text;
+      if (href) val.setAttribute('href', href);
+    }
+
+    showDetail('name', CONTACT.name);
+    const emailBox = document.getElementById('val-email');
+    if (CONTACT.emails.length === 0) {
+      document.getElementById('row-email').style.display = 'none';
+    } else {
+      CONTACT.emails.forEach((addr) => {
+        const a = document.createElement('a');
+        a.textContent = addr;
+        a.setAttribute('href', 'mailto:' + addr);
+        emailBox.appendChild(a);
+      });
+    }
+    showDetail('whatsapp', CONTACT.whatsapp ? '+' + CONTACT.whatsapp : '', CONTACT.whatsapp ? 'https://wa.me/' + CONTACT.whatsapp : '');
+    showDetail('location', CONTACT.location);
+
+    // ---------- Supabase ----------
+    const supabaseUrl = 'https://oadbiabeqavrvtymcvuv.supabase.co';
+    const supabaseKey = 'sb_publishable_cQvpBFh00y0lujudlGhlJQ_ltN3ltN7';
+    const supabaseClient = (typeof supabase !== 'undefined')
+      ? supabase.createClient(supabaseUrl, supabaseKey)
+      : null;
+
+    // ---------- Form ----------
+    const form = document.getElementById('contactForm');
+    const sendBtn = document.getElementById('sendBtn');
+    const statusEl = document.getElementById('status');
+    const messageEl = document.getElementById('cMessage');
+    const charCount = document.getElementById('charCount');
+    const COOLDOWN_MS = 60 * 1000; // one message per minute per browser
+
+    messageEl.addEventListener('input', () => {
+      charCount.textContent = messageEl.value.length;
+    });
+
+    function setStatus(text, type) {
+      statusEl.textContent = text;
+      statusEl.className = 'status show ' + type;
+    }
+
+    function lastSentAt() {
+      try { return Number(localStorage.getItem('tt_contact_last')) || 0; }
+      catch (e) { return 0; }
+    }
+
+    function markSent() {
+      try { localStorage.setItem('tt_contact_last', String(Date.now())); }
+      catch (e) { /* storage unavailable, ignore */ }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Honeypot: real people leave this empty
+      if (document.getElementById('cWebsite').value) return;
+
+      const name = document.getElementById('cName').value.trim();
+      const email = document.getElementById('cEmail').value.trim();
+      const subject = document.getElementById('cSubject').value.trim();
+      const message = messageEl.value.trim();
+
+      if (!name) return setStatus('Please enter your name.', 'err');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return setStatus('Please enter a valid email address.', 'err');
+      if (message.length < 10) return setStatus('Your message needs at least 10 characters.', 'err');
+
+      if (Date.now() - lastSentAt() < COOLDOWN_MS) {
+        return setStatus('You just sent a message. Please wait a minute before sending another.', 'err');
+      }
+
+      if (!supabaseClient) {
+        return setStatus('The message service could not load. Check your connection and refresh the page.', 'err');
+      }
+
+      sendBtn.disabled = true;
+      sendBtn.textContent = 'Sending...';
+
+      try {
+        const { error } = await supabaseClient
+          .from('contact_messages')
+          .insert({ name, email, subject: subject || null, message });
+
+        if (error) throw error;
+
+        markSent();
+        form.reset();
+        charCount.textContent = '0';
+        setStatus('Message sent. Thank you, we will reply by email.', 'ok');
+      } catch (err) {
+        console.error('Contact form error:', err);
+        setStatus('Your message could not be sent. Please try again in a moment.', 'err');
+      } finally {
+        sendBtn.disabled = false;
+        sendBtn.textContent = 'Send message';
+      }
+    });
+  </script>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>

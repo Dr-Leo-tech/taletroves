@@ -1,0 +1,69 @@
+/* Shared styles for privacy.html and terms.html (builds on main.css) */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #f0f2f5;
+  color: #333;
+}
+
+.legal-card {
+  background: #fff;
+  max-width: 760px;
+  margin: 20px auto 40px;
+  padding: 32px 28px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border-top: 5px solid #764ba2;
+  line-height: 1.7;
+}
+
+.legal-card h1 {
+  color: #764ba2;
+  margin: 0 0 6px;
+  font-size: 2rem;
+}
+
+.legal-card .updated {
+  color: #888;
+  font-size: 0.9em;
+  margin: 0 0 24px;
+}
+
+.legal-card h2 {
+  color: #667eea;
+  font-size: 1.25rem;
+  margin: 28px 0 8px;
+}
+
+.legal-card p,
+.legal-card li {
+  font-size: 1rem;
+}
+
+.legal-card ul {
+  padding-left: 22px;
+}
+
+.legal-card li {
+  margin-bottom: 6px;
+}
+
+.legal-card a {
+  color: #764ba2;
+  text-decoration: underline;
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 3px solid #764ba2;
+  outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+  .legal-card {
+    padding: 24px 18px;
+    margin: 10px 0 30px;
+  }
+  .legal-card h1 {
+    font-size: 1.6rem;
+  }
+}
