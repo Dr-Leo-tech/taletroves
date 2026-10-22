@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="cookie-consent.js"></script>
   <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-2W62NFYZJ3"></script>
 <script>
@@ -13,7 +14,14 @@
 
   <meta charset="UTF-8" />
  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>Tale Trove</title>
+  <title>TaleTrove | Read and Share Original Stories Online</title>
+  <meta name="description" content="TaleTrove is a free story-sharing community where authors publish stories chapter by chapter and readers discover, like and comment on them. Join or browse as a guest.">
+  <link rel="canonical" href="https://taletroves.netlify.app/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="TaleTrove">
+  <meta property="og:title" content="TaleTrove | Read and Share Original Stories Online">
+  <meta property="og:description" content="TaleTrove is a free story-sharing community where authors publish stories chapter by chapter and readers discover, like and comment on them. Join or browse as a guest.">
+  <meta property="og:url" content="https://taletroves.netlify.app/">
 
   <style>
     :root{
@@ -203,6 +211,15 @@
     .progress-bar{ width:220px; height:6px; background:#1e293b; margin:20px auto 0; border-radius:10px; overflow:hidden; }
     .progress{ width:0%; height:100%; background:#3b82f6; animation:loading 3s linear forwards; }
     @keyframes loading{ from{width:0%;} to{width:100%;} }
+
+    /* ---------- STATIC INTRO (crawlable content) ---------- */
+    body{ flex-direction:column; }
+    .intro{ width:100%; max-width:720px; margin:48px auto 0; background:#fff; border-radius:20px; padding:28px 32px; box-shadow:0 10px 30px rgba(80,60,140,.10); line-height:1.7; }
+    .intro h2{ margin-top:0; color:#5b3fa8; }
+    .intro h3{ color:#5b3fa8; margin-bottom:4px; }
+    .intro a{ color:#7b3fd1; }
+    .site-foot{ width:100%; max-width:720px; margin:24px auto 0; text-align:center; font-size:14px; color:var(--muted); }
+    .site-foot a{ color:#5b3fa8; text-decoration:none; margin:0 6px; }
   </style>
 </head>
 <body>
@@ -288,6 +305,21 @@
   </div>
 </div>
 
+
+<main class="intro">
+  <h2>Welcome to TaleTrove</h2>
+  <p>TaleTrove is a free story-sharing community built for writers and readers. Authors publish their fiction chapter by chapter, and readers discover new worlds, follow the tales they love, and talk about them with the people who wrote them. Whether you are drafting your first short story or looking for your next favourite series, TaleTrove gives you a simple, friendly place to do it.</p>
+  <h3>For readers</h3>
+  <p>Browse the latest stories without even creating an account by using guest mode. When you find something you enjoy, sign up to like stories, leave comments, and keep track of what you are reading. Every story is split into chapters, so you can read at your own pace and pick up where you left off.</p>
+  <h3>For authors</h3>
+  <p>Register as an author to publish your own stories, add chapters as you write them, and hear directly from your readers. Your author profile collects all of your work in one place, so new readers can find everything you have written.</p>
+  <h3>Learn more</h3>
+  <p>Read <a href="about.html">about TaleTrove</a>, browse the <a href="stories.html">latest stories</a>, or <a href="guest.html">explore as a guest</a>. Please also review our <a href="terms.html">Terms of Service</a> and <a href="privacy.html">Privacy Policy</a>, or <a href="contact.html">contact us</a> with any questions.</p>
+</main>
+<footer class="site-foot">
+  © 2026 TaleTrove &middot;
+  <a href="about.html">About</a> | <a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms</a> | <a href="contact.html">Contact</a>
+</footer>
 <script>
   const supabaseUrl = 'https://oadbiabeqavrvtymcvuv.supabase.co';
   const supabaseKey = 'sb_publishable_cQvpBFh00y0lujudlGhlJQ_ltN3ltN7';

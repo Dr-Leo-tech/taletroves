@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="cookie-consent.js"></script>
   <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-2W62NFYZJ3"></script>
 <script>
@@ -13,11 +14,18 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Public Feed - Tale Trove</title>
+    <title>Latest Stories | TaleTrove</title>
+  <meta name="description" content="Browse the latest stories published by TaleTrove authors. Read chapter by chapter, like your favourites and join the conversation.">
+  <link rel="canonical" href="https://taletroves.netlify.app/stories.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="TaleTrove">
+  <meta property="og:title" content="Latest Stories | TaleTrove">
+  <meta property="og:description" content="Browse the latest stories published by TaleTrove authors. Read chapter by chapter, like your favourites and join the conversation.">
+  <meta property="og:url" content="https://taletroves.netlify.app/stories.html">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="main.css">
     <style>
-/* Updated Styles for Stories.html */
+/* Updated Styles for stories.html */
 html, body {
     height: 100%;
     margin: 0;
@@ -105,7 +113,13 @@ body {
   </div>
 
 <!-- FOOTER -->
-  <div class="js-footer"></div>
+  <div class="js-footer">
+    <footer>
+      <p>© 2026 TaleTrove. <br><br>
+      <a href="about.html">About</a> | <a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms</a> | <a href="contact.html">Contact</a>
+      </p>
+    </footer>
+  </div>
 
 <script>
     const supabaseUrl = 'https://oadbiabeqavrvtymcvuv.supabase.co';

@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <!-- Google tag (gtag.js) -->
+    <script src="cookie-consent.js"></script>
+  <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-2W62NFYZJ3"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -15,7 +16,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <link rel="stylesheet" href="main.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <title>Guest Mode | TaleTrove</title>
+    <title>Explore TaleTrove as a Guest</title>
+  <meta name="description" content="Explore the latest chronicles on TaleTrove without signing up. Read stories as a guest, then join to like and comment.">
+  <link rel="canonical" href="https://taletroves.netlify.app/guest.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="TaleTrove">
+  <meta property="og:title" content="Explore TaleTrove as a Guest">
+  <meta property="og:description" content="Explore the latest chronicles on TaleTrove without signing up. Read stories as a guest, then join to like and comment.">
+  <meta property="og:url" content="https://taletroves.netlify.app/guest.html">
     
     <style>
         /* Using the styles from TaleTrove.html for consistency */
@@ -86,7 +94,13 @@
     </div> <!-- end #main -->
 
 
-    <div class="js-footer"></div>
+    <div class="js-footer">
+    <footer>
+      <p>© 2026 TaleTrove. <br><br>
+      <a href="about.html">About</a> | <a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms</a> | <a href="contact.html">Contact</a>
+      </p>
+    </footer>
+  </div>
     <script>
     // Supabase configuration
 const supabaseUrl = 'https://oadbiabeqavrvtymcvuv.supabase.co';
@@ -115,7 +129,7 @@ async function loadGuestStories() {
     }
 
     grid.innerHTML = data.map(story => {
-        // 2. Extract counts safely (similar to Stories.html logic)
+        // 2. Extract counts safely (similar to stories.html logic)
         const likeCount = story.likes?.[0]?.count || 0;
         const commentCount = story.comments?.[0]?.count || 0;
 
@@ -132,7 +146,7 @@ async function loadGuestStories() {
                         <span>💬 ${commentCount}</span>
                     </div>
 
-                    <a href="Story.html?id=${story.id}" style="color: #764ba2; font-weight: bold; text-decoration: none;">Read More →</a>
+                    <a href="story.html?id=${story.id}" style="color: #764ba2; font-weight: bold; text-decoration: none;">Read More →</a>
                 </div>
                 
                 <div class="story-actions">

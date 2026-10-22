@@ -8,7 +8,7 @@ export function readerFooter(){
     const footerhtml = `
     <footer>
       <p>© ${year} TaleTrove. <br><br>
-      <a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms</a> | <a href="contact.html">Contact</a>
+      <a href="about.html">About</a> | <a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms</a> | <a href="contact.html">Contact</a>
       </p>
       <!--
       <p>Follow us on <br>

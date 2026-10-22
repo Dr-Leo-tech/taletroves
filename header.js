@@ -20,6 +20,7 @@ export function readerHeader(){
         <a href="javascript:void(0)" class="closebtn js-closebtn">×</a>
         <a href="home.html">Home</a>
         <a href="stories.html">Stories</a>
+        <a href="about.html">About</a>
         <a href="dashboard.html">My Profile</a>
       </div>
     </header>

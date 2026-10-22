@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="cookie-consent.js"></script>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-2W62NFYZJ3"></script>
   <script>
@@ -12,7 +13,14 @@
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contact - Tale Trove</title>
+  <title>Contact TaleTrove</title>
+  <meta name="description" content="Get in touch with the TaleTrove team with questions, bug reports or feedback.">
+  <link rel="canonical" href="https://taletroves.netlify.app/contact.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="TaleTrove">
+  <meta property="og:title" content="Contact TaleTrove">
+  <meta property="og:description" content="Get in touch with the TaleTrove team with questions, bug reports or feedback.">
+  <meta property="og:url" content="https://taletroves.netlify.app/contact.html">
   <link rel="stylesheet" href="main.css">
   <style>
     body {
@@ -183,7 +191,7 @@
 
         <ul class="details" id="details">
           <li id="row-name"><span class="label">Name</span><span id="val-name"></span></li>
-          <li id="row-email"><span class="label">Email</span><span id="val-email" class="stack"></span></li>
+          <li id="row-email"><span class="label">Email</span><span id="val-email" class="stack"><a href="mailto:taletrove211@gmail.com">taletrove211@gmail.com</a></span></li>
           <li id="row-whatsapp"><span class="label">WhatsApp</span><a id="val-whatsapp"></a></li>
           <li id="row-location"><span class="label">Based in</span><span id="val-location"></span></li>
         </ul>
@@ -227,7 +235,13 @@
     </div>
   </main>
 
-  <div class="js-footer"></div>
+  <div class="js-footer">
+    <footer>
+      <p>© 2026 TaleTrove. <br><br>
+      <a href="about.html">About</a> | <a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms</a> | <a href="contact.html">Contact</a>
+      </p>
+    </footer>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -253,6 +267,7 @@
 
     showDetail('name', CONTACT.name);
     const emailBox = document.getElementById('val-email');
+    emailBox.textContent = '';
     if (CONTACT.emails.length === 0) {
       document.getElementById('row-email').style.display = 'none';
     } else {

@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <!-- Google tag (gtag.js) -->
+    <script src="cookie-consent.js"></script>
+  <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-2W62NFYZJ3"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -16,7 +17,14 @@
    <link rel="stylesheet" href="main.css">
   
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <title>TaleTrove - Home</title>
+    <title>TaleTrove - Home | Latest Stories</title>
+  <meta name="description" content="Catch up on the newest stories from TaleTrove authors, or browse the full library of chapter-by-chapter fiction.">
+  <link rel="canonical" href="https://taletroves.netlify.app/home.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="TaleTrove">
+  <meta property="og:title" content="TaleTrove - Home | Latest Stories">
+  <meta property="og:description" content="Catch up on the newest stories from TaleTrove authors, or browse the full library of chapter-by-chapter fiction.">
+  <meta property="og:url" content="https://taletroves.netlify.app/home.html">
     <style>
         /* Flexbox fix for the footer hanging issue */
         html, body { height: 100%; margin: 0; }
@@ -65,11 +73,17 @@
             <div id="latestStoriesGrid" class="stories-grid">
                 <p>Loading the latest tales...</p>
             </div>
-            <a href="Stories.html" class="view-all-btn">View All Stories</a>
+            <a href="stories.html" class="view-all-btn">View All Stories</a>
         </div>
     </main>
 
-    <div class="js-footer"></div>
+    <div class="js-footer">
+    <footer>
+      <p>© 2026 TaleTrove. <br><br>
+      <a href="about.html">About</a> | <a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms</a> | <a href="contact.html">Contact</a>
+      </p>
+    </footer>
+  </div>
     
         <script>
         const supabaseUrl = 'https://oadbiabeqavrvtymcvuv.supabase.co';
@@ -97,7 +111,7 @@
             }
 
             grid.innerHTML = data.map(story => {
-                // 2. Extract counts safely (matching your Stories.html logic)
+                // 2. Extract counts safely (matching your stories.html logic)
                 const likeCount = story.likes?.[0]?.count || 0;
                 const commentCount = story.comments?.[0]?.count || 0;
 
@@ -111,7 +125,7 @@
                         <span>💬 ${commentCount}</span>
                     </div>
 
-                    <a href="Story.html?id=${story.id}" style="color: #764ba2; font-weight: bold; text-decoration: none; border-bottom: 2px solid transparent; transition: 0.3s;">Read the Full Tale →</a>
+                    <a href="story.html?id=${story.id}" style="color: #764ba2; font-weight: bold; text-decoration: none; border-bottom: 2px solid transparent; transition: 0.3s;">Read the Full Tale →</a>
                 </div>
                 `;
             }).join('');

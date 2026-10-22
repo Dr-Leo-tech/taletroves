@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard.html
+Disallow: /author-dashboard.html
+Disallow: /reset-password.html
+
+Sitemap: https://taletroves.netlify.app/sitemap.xml

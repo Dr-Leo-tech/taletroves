@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="cookie-consent.js"></script>
   <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-2W62NFYZJ3"></script>
 <script>
@@ -15,7 +16,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="main.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <title>Tale Trove - Read Story</title>
+    <title>Read a Story | TaleTrove</title>
+  <meta name="description" content="Read this story chapter by chapter on TaleTrove, and share your thoughts in the comments.">
+  <link rel="canonical" href="https://taletroves.netlify.app/story.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="TaleTrove">
+  <meta property="og:title" content="Read a Story | TaleTrove">
+  <meta property="og:description" content="Read this story chapter by chapter on TaleTrove, and share your thoughts in the comments.">
+  <meta property="og:url" content="https://taletroves.netlify.app/story.html">
+  <meta name="robots" content="index,follow">
     <style>
         .story-container { max-width: 800px; margin: 40px auto; padding: 20px; }
         .chapter-list { margin-top: 30px; }
@@ -49,7 +58,7 @@
     <div class="js-header"></div>
 
     <div class="story-container">
-        <a href="Stories.html" class="back-link">← Back to Library</a>
+        <a href="stories.html" class="back-link">← Back to Library</a>
         <h1 id="storyTitle">Loading story...</h1>
         <p id="storyMeta" style="color: #666; font-style: italic;"></p>
    <div class="interaction-bar">
@@ -67,7 +76,13 @@
         </div>
     </div>
 
-    <div class="js-footer"></div>
+    <div class="js-footer">
+    <footer>
+      <p>© 2026 TaleTrove. <br><br>
+      <a href="about.html">About</a> | <a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms</a> | <a href="contact.html">Contact</a>
+      </p>
+    </footer>
+  </div>
 
     <script>
         const supabaseUrl = 'https://oadbiabeqavrvtymcvuv.supabase.co';
