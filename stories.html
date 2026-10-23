@@ -125,6 +125,7 @@ body {
     const supabaseUrl = 'https://oadbiabeqavrvtymcvuv.supabase.co';
     const supabaseKey = 'sb_publishable_cQvpBFh00y0lujudlGhlJQ_ltN3ltN7';
     const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
     async function loadFeed() {
     try {
@@ -153,15 +154,15 @@ body {
             return `
                 <div class="story-card">
                     <div>
-                        <h2 class="story-title">${story.title}</h2>
-                        <p class="story-author">By <a href="author.html?id=${story.author_id}" style="color:#667eea;text-decoration:none;">${story.profiles?.username || 'Unknown Author'}</a></p>
-                        <p class="story-preview">${story.content.substring(0, 120)}...</p>
+                        <h2 class="story-title">${esc(story.title)}</h2>
+                        <p class="story-author">By <a href="author.html?id=${encodeURIComponent(story.author_id)}" style="color:#667eea;text-decoration:none;">${esc(story.profiles?.username || 'Unknown Author')}</a></p>
+                        <p class="story-preview">${esc((story.content || '').substring(0, 120))}...</p>
                         <div style="margin-bottom: 15px; font-size: 0.9em; color: #764ba2;">
                             <span style="margin-right: 15px;">❤️ ${likeCount}</span>
                             <span>💬 ${commentCount}</span>
                         </div>
                     </div>
-                    <a href="story.html?id=${story.id}" class="read-btn">Read Full Story →</a>
+                    <a href="story.html?id=${encodeURIComponent(story.id)}" class="read-btn">Read Full Story →</a>
                 </div>
             `;
         }).join('');

@@ -133,6 +133,8 @@
     const supabaseUrl = 'https://oadbiabeqavrvtymcvuv.supabase.co';
     const supabaseKey = 'sb_publishable_cQvpBFh00y0lujudlGhlJQ_ltN3ltN7';
     const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    window.editStoryById = function(id){ const s = (window.__myStories||{})[id]; if (s) window.editStory(s.id, s.title, s.content); };
 
     let currentUser = null;
 
@@ -141,7 +143,7 @@
         const { data: { user } } = await supabaseClient.auth.getUser();
         
         if (!user) {
-            window.location.href = "Index.html";
+            window.location.href = "index.html";
             return;
         }
 
@@ -159,7 +161,7 @@
             return;
         }
 
-        document.getElementById('welcomeMsg').innerHTML = `Welcome back, <strong>${profile.username}</strong>!`;
+        document.getElementById('welcomeMsg').innerHTML = `Welcome back, <strong>${esc(profile.username)}</strong>!`;
         
         const profileLink = document.getElementById('publicProfileLink');
         profileLink.href = `author.html?id=${user.id}`;
@@ -186,7 +188,7 @@ async function fetchMyStories(authorId) {
     const storiesList = document.getElementById('myStories'); // The div currently stuck on 'Loading...'
 
     if (error) {
-        storiesList.innerHTML = "Error loading stories: " + error.message;
+        storiesList.textContent = "Error loading stories: " + error.message;
         return;
     }
 
@@ -197,17 +199,18 @@ async function fetchMyStories(authorId) {
         // 2. Update the Visual List
         storiesList.innerHTML = ""; // Clear the 'Loading...' message
 
+        window.__myStories = Object.fromEntries(stories.map(x => [x.id, x]));
         stories.forEach(s => {
             // Add to dropdown
-            select.innerHTML += `<option value="${s.id}">${s.title}</option>`;
+            select.innerHTML += `<option value="${esc(s.id)}">${esc(s.title)}</option>`;
 
             // Add to the visual list on the page
             storiesList.innerHTML += `
                 <div class="card story-card">
-                    <h4>${s.title}</h4>
+                    <h4>${esc(s.title)}</h4>
                     <div style="display: flex; gap: 10px; margin-top: 10px;">
-                        <button onclick="editStory('${s.id}', '${s.title}', '${s.content}')" style="background: #667eea; width: auto;">Edit</button>
-                        <button onclick="deleteStory('${s.id}')" style="background: #ff4b2b; width: auto;">Delete</button>
+                        <button onclick="editStoryById('${esc(s.id)}')" style="background: #667eea; width: auto;">Edit</button>
+                        <button onclick="deleteStory('${esc(s.id)}')" style="background: #ff4b2b; width: auto;">Delete</button>
                     </div>
                 </div>
             `;

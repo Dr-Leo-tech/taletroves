@@ -17,13 +17,12 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <title>Read Chapter | TaleTrove</title>
   <meta name="description" content="Read a chapter of a story on TaleTrove.">
-  <link rel="canonical" href="https://taletroves.netlify.app/readchapter.html">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="TaleTrove">
   <meta property="og:title" content="Read Chapter | TaleTrove">
   <meta property="og:description" content="Read a chapter of a story on TaleTrove.">
   <meta property="og:url" content="https://taletroves.netlify.app/readchapter.html">
-  <meta name="robots" content="index,follow">
+  <meta name="robots" content="noindex,follow">
     <style>
         .reader-container { max-width: 700px; margin: 50px auto; padding: 20px; line-height: 1.8; }
         .chapter-content { font-size: 1.2rem; color: #333; white-space: pre-wrap; margin-bottom: 40px; }
@@ -142,7 +141,7 @@
             // Handle Previous Button
             const prevBtn = document.getElementById('prevBtn');
             if (currentIndex > 0) {
-                prevBtn.href = `ReadChapter.html?id=${chapters[currentIndex - 1].id}`;
+                prevBtn.href = `readchapter.html?id=${chapters[currentIndex - 1].id}`;
             } else {
                 prevBtn.classList.add('disabled');
             }
@@ -150,7 +149,7 @@
             // Handle Next Button
             const nextBtn = document.getElementById('nextBtn');
             if (currentIndex < chapters.length - 1) {
-                nextBtn.href = `ReadChapter.html?id=${chapters[currentIndex + 1].id}`;
+                nextBtn.href = `readchapter.html?id=${chapters[currentIndex + 1].id}`;
             } else {
                 nextBtn.classList.add('disabled');
             }

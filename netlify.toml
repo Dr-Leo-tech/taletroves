@@ -1,0 +1,6 @@
+[build]
+  command = "node scripts/prerender.mjs"
+  publish = "."
+
+[build.environment]
+  NODE_VERSION = "20"

@@ -93,6 +93,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
   // 1. SECURITY CHECK: Is user logged in?
   const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
@@ -123,7 +124,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const dob = profile?.dob || user.user_metadata.dob || "N/A";
   const gender = profile?.gender || user.user_metadata.gender || "N/A";
 
-  document.getElementById("userInfo").innerHTML = `Logged in as <strong>${username}</strong>`;
+  document.getElementById("userInfo").innerHTML = `Logged in as <strong>${esc(username)}</strong>`;
   document.getElementById("dUsername").innerText = username;
   document.getElementById("dEmail").innerText = user.email;
   document.getElementById("dDob").innerText = dob;

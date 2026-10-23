@@ -89,6 +89,7 @@
         const supabaseUrl = 'https://oadbiabeqavrvtymcvuv.supabase.co';
         const supabaseKey = 'sb_publishable_cQvpBFh00y0lujudlGhlJQ_ltN3ltN7';
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
         async function loadHomeStories() {
             // 1. Updated Select query to fetch counts for likes and comments
@@ -117,15 +118,15 @@
 
                 return `
                 <div class="story-card" style="border-top: 5px solid #764ba2; text-align: left; padding: 25px; border-radius: 15px; background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
-                    <h3 style="color: #764ba2; margin-top: 0;">${story.title}</h3>
-                    <p style="color: #666; font-size: 0.95em; line-height: 1.6;">${story.content.substring(0, 120)}...</p>
+                    <h3 style="color: #764ba2; margin-top: 0;">${esc(story.title)}</h3>
+                    <p style="color: #666; font-size: 0.95em; line-height: 1.6;">${esc((story.content || '').substring(0, 120))}...</p>
                     
                     <div style="margin-bottom: 15px; font-size: 0.9em; color: #764ba2;">
                         <span style="margin-right: 15px;">❤️ ${likeCount}</span>
                         <span>💬 ${commentCount}</span>
                     </div>
 
-                    <a href="story.html?id=${story.id}" style="color: #764ba2; font-weight: bold; text-decoration: none; border-bottom: 2px solid transparent; transition: 0.3s;">Read the Full Tale →</a>
+                    <a href="story.html?id=${encodeURIComponent(story.id)}" style="color: #764ba2; font-weight: bold; text-decoration: none; border-bottom: 2px solid transparent; transition: 0.3s;">Read the Full Tale →</a>
                 </div>
                 `;
             }).join('');
