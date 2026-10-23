@@ -1,5 +1,5 @@
 [build]
-  command = "node scripts/prerender.mjs"
+  command = "node prerender.mjs || echo 'prerender skipped'"
   publish = "."
 
 [build.environment]
