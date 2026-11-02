@@ -45,6 +45,7 @@ const HEAD_COMMON = `<script src="cookie-consent.js"></script>
 const FOOTER = `<footer>
       <p>© ${new Date().getFullYear()} TaleTrove. <br><br>
       <a href="about.html">About</a> | <a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms</a> | <a href="contact.html">Contact</a>
+      <br>Built by <a href="about.html#developer">Dr. Leo</a>
       </p>
     </footer>`;
 

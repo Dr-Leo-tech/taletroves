@@ -9,6 +9,7 @@ export function readerFooter(){
     <footer>
       <p>© ${year} TaleTrove. <br><br>
       <a href="about.html">About</a> | <a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms</a> | <a href="contact.html">Contact</a>
+      <br>Built by <a href="about.html#developer">Dr. Leo</a>
       </p>
       <!--
       <p>Follow us on <br>

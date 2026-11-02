@@ -12,8 +12,9 @@
   </script>
 
   <meta charset="UTF-8">
+  <meta name="author" content="Dr. Leo">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contact TaleTrove</title>
+  <title>Contact TaleTrove | Dr. Leo, Developer</title>
   <meta name="description" content="Get in touch with the TaleTrove team with questions, bug reports or feedback.">
   <link rel="canonical" href="https://taletroves.netlify.app/contact.html">
   <meta property="og:type" content="website">
@@ -21,6 +22,22 @@
   <meta property="og:title" content="Contact TaleTrove">
   <meta property="og:description" content="Get in touch with the TaleTrove team with questions, bug reports or feedback.">
   <meta property="og:url" content="https://taletroves.netlify.app/contact.html">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    "name": "Contact TaleTrove",
+    "url": "https://taletroves.netlify.app/contact.html",
+    "about": {
+      "@type": "Person",
+      "@id": "https://taletroves.netlify.app/about.html#dr-leo",
+      "name": "Dr. Leo",
+      "email": "taletrove211@gmail.com",
+      "telephone": "+2348051638706",
+      "sameAs": ["https://github.com/Dr-Leo-tech"]
+    }
+  }
+  </script>
   <link rel="stylesheet" href="main.css">
   <style>
     body {
@@ -187,13 +204,14 @@
 
       <section class="card">
         <h1>Contact us</h1>
-        <p class="intro">Have a question, a bug to report, or feedback on TaleTrove? Send a message below or use the details here. We read every message.</p>
+        <p class="intro">TaleTrove is built and maintained by Dr. Leo. Have a question, a bug to report, or feedback on TaleTrove? Send a message below or use the details here. We read every message.</p>
 
         <ul class="details" id="details">
-          <li id="row-name"><span class="label">Name</span><span id="val-name"></span></li>
-          <li id="row-email"><span class="label">Email</span><span id="val-email" class="stack"><a href="mailto:taletrove211@gmail.com">taletrove211@gmail.com</a></span></li>
-          <li id="row-whatsapp"><span class="label">WhatsApp</span><a id="val-whatsapp"></a></li>
-          <li id="row-location"><span class="label">Based in</span><span id="val-location"></span></li>
+          <li id="row-name"><span class="label">Name</span><span id="val-name">Dr. Leo (founder and developer of TaleTrove)</span></li>
+          <li id="row-email"><span class="label">Email</span><span id="val-email" class="stack"><a href="mailto:taletrove211@gmail.com">taletrove211@gmail.com</a><a href="mailto:taletrove193@gmail.com">taletrove193@gmail.com</a></span></li>
+          <li id="row-whatsapp"><span class="label">WhatsApp</span><a id="val-whatsapp" href="https://wa.me/2348051638706">+2348051638706</a></li>
+          <li id="row-location"><span class="label">Based in</span><span id="val-location">Nigeria</span></li>
+          <li id="row-github"><span class="label">GitHub</span><a href="https://github.com/Dr-Leo-tech" rel="me noopener">github.com/Dr-Leo-tech</a></li>
         </ul>
       </section>
 
@@ -239,47 +257,13 @@
     <footer>
       <p>© 2026 TaleTrove. <br><br>
       <a href="about.html">About</a> | <a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms</a> | <a href="contact.html">Contact</a>
+      <br>Built by <a href="about.html#developer">Dr. Leo</a>
       </p>
     </footer>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // ============================================================
-    // EDIT YOUR CONTACT DETAILS HERE. Leave a value as "" to hide it.
-    // WhatsApp: digits only, with country code and no "+" (e.g. "2348012345678").
-    // ============================================================
-    const CONTACT = {
-      name: "Dr. Leo",
-      emails: ["taletrove211@gmail.com", "taletrove193@gmail.com"],
-      whatsapp: "2348051638706",
-      location: "Nigeria"
-    };
-
-    // ---------- Fill in the details block ----------
-    function showDetail(key, text, href) {
-      const row = document.getElementById('row-' + key);
-      const val = document.getElementById('val-' + key);
-      if (!text) { row.style.display = 'none'; return; }
-      val.textContent = text;
-      if (href) val.setAttribute('href', href);
-    }
-
-    showDetail('name', CONTACT.name);
-    const emailBox = document.getElementById('val-email');
-    emailBox.textContent = '';
-    if (CONTACT.emails.length === 0) {
-      document.getElementById('row-email').style.display = 'none';
-    } else {
-      CONTACT.emails.forEach((addr) => {
-        const a = document.createElement('a');
-        a.textContent = addr;
-        a.setAttribute('href', 'mailto:' + addr);
-        emailBox.appendChild(a);
-      });
-    }
-    showDetail('whatsapp', CONTACT.whatsapp ? '+' + CONTACT.whatsapp : '', CONTACT.whatsapp ? 'https://wa.me/' + CONTACT.whatsapp : '');
-    showDetail('location', CONTACT.location);
 
     // ---------- Supabase ----------
     const supabaseUrl = 'https://oadbiabeqavrvtymcvuv.supabase.co';

@@ -13,7 +13,8 @@
 </script>
 
   <meta charset="UTF-8" />
- <meta name="viewport" content="width=device-width,initial-scale=1.0">
+ <meta name="author" content="Dr. Leo">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>TaleTrove | Read and Share Original Stories Online</title>
   <meta name="description" content="TaleTrove is a free story-sharing community where authors publish stories chapter by chapter and readers discover, like and comment on them. Join or browse as a guest.">
   <link rel="canonical" href="https://taletroves.netlify.app/">
@@ -22,6 +23,48 @@
   <meta property="og:title" content="TaleTrove | Read and Share Original Stories Online">
   <meta property="og:description" content="TaleTrove is a free story-sharing community where authors publish stories chapter by chapter and readers discover, like and comment on them. Join or browse as a guest.">
   <meta property="og:url" content="https://taletroves.netlify.app/">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://taletroves.netlify.app/#website",
+        "name": "TaleTrove",
+        "url": "https://taletroves.netlify.app/",
+        "description": "A free story-sharing community where authors publish stories chapter by chapter and readers discover, like and comment on them.",
+        "creator": { "@id": "https://taletroves.netlify.app/about.html#dr-leo" },
+        "publisher": { "@id": "https://taletroves.netlify.app/#org" }
+      },
+      {
+        "@type": "Organization",
+        "@id": "https://taletroves.netlify.app/#org",
+        "name": "TaleTrove",
+        "url": "https://taletroves.netlify.app/",
+        "logo": "https://taletroves.netlify.app/image/tt-logo.png",
+        "founder": { "@id": "https://taletroves.netlify.app/about.html#dr-leo" },
+        "email": "taletrove211@gmail.com",
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "customer support",
+          "email": "taletrove211@gmail.com",
+          "url": "https://taletroves.netlify.app/contact.html"
+        }
+      },
+      {
+        "@type": "Person",
+        "@id": "https://taletroves.netlify.app/about.html#dr-leo",
+        "name": "Dr. Leo",
+        "alternateName": "Dr-Leo-tech",
+        "jobTitle": "Founder and Developer of TaleTrove",
+        "url": "https://taletroves.netlify.app/about.html#developer",
+        "sameAs": ["https://github.com/Dr-Leo-tech"],
+        "address": { "@type": "PostalAddress", "addressCountry": "NG" }
+      }
+    ]
+  }
+  </script>
 
   <style>
     :root{
@@ -318,7 +361,8 @@
 </main>
 <footer class="site-foot">
   © 2026 TaleTrove &middot;
-  <a href="about.html">About</a> | <a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms</a> | <a href="contact.html">Contact</a>
+  <a href="about.html">About</a> | <a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms</a> | <a href="contact.html">Contact</a><br>
+  Built by <a href="about.html#developer">Dr. Leo</a>
 </footer>
 <script>
   const supabaseUrl = 'https://oadbiabeqavrvtymcvuv.supabase.co';
