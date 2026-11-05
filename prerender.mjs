@@ -44,12 +44,11 @@ const HEAD_COMMON = `<script src="cookie-consent.js"></script>
 
 const FOOTER = `<footer>
       <p>© ${new Date().getFullYear()} TaleTrove. <br><br>
-      <a href="about.html">About</a> | <a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms</a> | <a href="contact.html">Contact</a>
-      <br>Built by <a href="about.html#developer">Dr. Leo</a>
+      <a href="about.html">About</a> | <a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms</a> | <a href="disclaimer.html">Disclaimer</a> | <a href="contact.html">Contact</a>
       </p>
     </footer>`;
 
-function page({ title, desc, canonicalPath, body, noindex }) {
+function page({ title, desc, canonicalPath, body, noindex, jsonld }) {
   const url = `${SITE}/${canonicalPath}`;
   return `<!DOCTYPE html>
 <html lang="en">
@@ -62,6 +61,7 @@ function page({ title, desc, canonicalPath, body, noindex }) {
   <meta name="description" content="${esc(desc)}">
   <link rel="canonical" href="${esc(url)}">
   ${noindex ? '<meta name="robots" content="noindex,follow">' : ''}
+  ${jsonld ? `<script type="application/ld+json">${JSON.stringify(jsonld).replace(/</g, '\\u003c')}</script>` : ''}
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="TaleTrove">
   <meta property="og:title" content="${esc(title)}">
@@ -96,9 +96,28 @@ function page({ title, desc, canonicalPath, body, noindex }) {
 `;
 }
 
+const articleLd = ({ headline, url, author, date, partOf }) => ({
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline,
+  url,
+  mainEntityOfPage: url,
+  author: { '@type': 'Person', name: author },
+  publisher: { '@type': 'Organization', name: 'TaleTrove', url: SITE },
+  ...(date ? { datePublished: new Date(date).toISOString() } : {}),
+  ...(partOf ? { isPartOf: { '@type': 'CreativeWork', name: partOf } } : {})
+});
+const previewOf = (s, n = 60) => { const w = String(s ?? '').trim().match(/\S+/g) || []; return w.slice(0, n).join(' ') + (w.length > n ? '…' : ''); };
+
+// Premium columns may not exist yet: try with them, fall back to the basic columns.
+async function fetchWithFallback(table, withPremium, basic, order) {
+  try { return await fetchAll(table, withPremium, order); }
+  catch (e) { console.log(`[prerender] ${table}: premium columns not available, using basic columns`); return await fetchAll(table, basic, order); }
+}
+
 async function main() {
-  const stories = await fetchAll('stories', 'id,title,content,author_id,created_at,profiles(username)', 'created_at.desc');
-  const chapters = await fetchAll('chapters', 'id,title,content,story_id,created_at', 'created_at.asc');
+  const stories = await fetchWithFallback('stories', 'id,title,content,author_id,created_at,is_premium,profiles(username)', 'id,title,content,author_id,created_at,profiles(username)', 'created_at.desc');
+  const chapters = await fetchWithFallback('chapters', 'id,title,content,story_id,created_at,is_premium', 'id,title,content,story_id,created_at', 'created_at.asc');
   console.log(`[prerender] ${stories.length} stories, ${chapters.length} chapters`);
 
   const byStory = new Map();
@@ -127,12 +146,16 @@ async function main() {
     const p = storyPath(s);
     writeFileSync(join(ROOT, p), page({
       title: `${s.title} by ${author} | TaleTrove`, desc: snippet(s.content) || `Read ${s.title} by ${author} on TaleTrove.`,
-      canonicalPath: p, body, noindex: !indexable
+      canonicalPath: p, body, noindex: !indexable,
+      jsonld: articleLd({ headline: s.title, url: `${SITE}/${p}`, author, date: s.created_at })
     }));
     if (indexable) urls.push({ loc: p, lastmod: s.created_at });
 
     chs.forEach((c, i) => {
-      const cwc = words(c.content);
+      // Never publish paid text: a chapter is gated if flagged premium itself,
+      // or if it is chapter 3+ of a story flagged premium. Gated = short preview only.
+      const gated = c.is_premium === true || (s.is_premium === true && i >= 2);
+      const cwc = gated ? 0 : words(c.content);
       const prev = chs[i - 1], next = chs[i + 1];
       const nav = `<div class="pr-nav">
         ${prev ? `<a class="pr-btn" href="${esc(chapterPath(s, prev))}">← Previous</a>` : '<span></span>'}
@@ -141,13 +164,14 @@ async function main() {
       </div>`;
       const cbody = `<h1>${esc(c.title)}</h1>
       <p class="pr-meta">Chapter ${i + 1} of <a href="${esc(p)}">${esc(s.title)}</a> · By <a href="author.html?id=${encodeURIComponent(s.author_id)}">${esc(author)}</a></p>
-      ${paras(c.content)}
+      ${gated ? `${paras(previewOf(c.content))}\n      <p><strong>This is a premium chapter.</strong> Open it on TaleTrove to unlock the full text.</p>` : paras(c.content)}
       ${nav}
       <p><a href="story.html?id=${encodeURIComponent(s.id)}">Like or comment on this story</a></p>`;
       const cp = chapterPath(s, c);
       writeFileSync(join(ROOT, cp), page({
-        title: `${c.title} – ${s.title} | TaleTrove`, desc: snippet(c.content) || `Read ${c.title} from ${s.title} on TaleTrove.`,
-        canonicalPath: cp, body: cbody, noindex: cwc < MIN_WORDS
+        title: `${c.title} – ${s.title} | TaleTrove`, desc: gated ? `Premium chapter from ${s.title} by ${author} on TaleTrove.` : (snippet(c.content) || `Read ${c.title} from ${s.title} on TaleTrove.`),
+        canonicalPath: cp, body: cbody, noindex: gated || cwc < MIN_WORDS,
+        jsonld: gated ? null : articleLd({ headline: c.title, url: `${SITE}/${cp}`, author, date: c.created_at, partOf: s.title })
       }));
       if (cwc >= MIN_WORDS) urls.push({ loc: cp, lastmod: c.created_at });
     });
@@ -167,7 +191,7 @@ async function main() {
   }
 
   // Sitemap
-  const staticPages = ['', 'about.html', 'home.html', 'stories.html', 'guest.html', 'contact.html', 'privacy.html', 'terms.html'];
+  const staticPages = ['', 'about.html', 'home.html', 'stories.html', 'guest.html', 'contact.html', 'privacy.html', 'terms.html', 'disclaimer.html'];
   const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
     staticPages.map(p => `  <url><loc>${SITE}/${p}</loc></url>`).join('\n') + '\n' +
     urls.map(u => `  <url><loc>${esc(SITE + '/' + u.loc)}</loc>${u.lastmod ? `<lastmod>${new Date(u.lastmod).toISOString().slice(0, 10)}</lastmod>` : ''}</url>`).join('\n') +
