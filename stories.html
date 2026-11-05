@@ -146,7 +146,19 @@ body {
         const feed = document.getElementById('publicFeed');
         if (error) throw error;
 
-        feed.innerHTML = data.map(story => {
+        // Header search sends visitors here as stories.html?q=term
+        const params = new URLSearchParams(location.search);
+        const q = (params.get('q') || '').trim().toLowerCase();
+        const by = params.get('by') === 'author' ? 'author' : 'title';
+        const rows = q
+            ? data.filter(s => String((by === 'author' ? s.profiles?.username : s.title) || '').toLowerCase().includes(q))
+            : data;
+        if (q && !rows.length) {
+            feed.innerHTML = `<p>No stories found with ${by === 'author' ? 'an author named' : 'a title containing'} “${esc(q)}”. Try a different word, or <a href="stories.html" style="color:#667eea;">see all stories</a>.</p>`;
+            return;
+        }
+
+        feed.innerHTML = rows.map(story => {
             // Extract counts safely
             const likeCount = story.likes?.[0]?.count || 0;
             const commentCount = story.comments?.[0]?.count || 0;
