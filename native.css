@@ -1,0 +1,21 @@
+html.is-app {
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: contain;
+}
+html.is-app body {
+  -webkit-user-select: none; user-select: none;
+  -webkit-touch-callout: none;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+/* Keep text selectable where people need it. Change .story-content to your story text class */
+html.is-app input, html.is-app textarea,
+html.is-app [contenteditable="true"], html.is-app .story-content {
+  -webkit-user-select: text; user-select: text;
+}
+html.is-app a, html.is-app button { touch-action: manipulation; }
+html.is-app button, html.is-app .btn {
+  transition: transform .08s ease, opacity .08s ease;
+}
+html.is-app button:active, html.is-app .btn:active { transform: scale(.97); opacity: .9; }
+html.is-app img { -webkit-user-drag: none; }
+html.is-app ::-webkit-scrollbar { display: none; }
