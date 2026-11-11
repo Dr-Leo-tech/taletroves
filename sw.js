@@ -2,7 +2,7 @@
    - Navigations: network first, cached copy used as the offline fallback.
    - Same-origin static assets (css/js/fonts/images): stale-while-revalidate.
    - Everything else (Supabase, CDNs, analytics): left to the browser. */
-var CACHE = 'taletrove-v2';
+var CACHE = 'taletrove-v3';
 
 self.addEventListener('install', function () {
     self.skipWaiting();

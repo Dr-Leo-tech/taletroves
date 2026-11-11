@@ -45,42 +45,47 @@
     if (e.target.closest('button, .btn, [role="button"]')) window.buzz();
   }, true);
 
-  // ---- Bottom tab bar (app only) ----
-  var TABS = [
-    { label: 'Home', icon: '🏠' },
-    { label: 'Stories', icon: '📚' },
-    { label: 'Profile', icon: '👤' },
-    { label: 'About', icon: 'ℹ️' }
-  ];
+  // ---- Bottom tab bar (app only): Home, Stories, Profile, Settings ----
+  var SESSION_KEY = 'sb-oadbiabeqavrvtymcvuv-auth-token';
 
-  function fileOf(href) {
-    var p = (href || '').split('?')[0].split('#')[0].split('/').pop();
-    return p === '' ? 'index.html' : p;
+  function isLoggedIn() {
+    try {
+      var raw = localStorage.getItem(SESSION_KEY);
+      if (!raw) return false;
+      var obj = JSON.parse(raw);
+      var s = obj && (obj.currentSession || obj);
+      return !!(s && (s.access_token || s.refresh_token));
+    } catch (e) { return false; }
   }
 
   function buildTabBar() {
     if (document.getElementById('app-tabbar')) return true;
-    var all = Array.prototype.slice.call(document.querySelectorAll('header a, nav a'));
-    var found = [];
-    TABS.forEach(function (t) {
-      var a = all.filter(function (x) {
-        return x.textContent.trim().toLowerCase() === t.label.toLowerCase();
-      })[0];
-      if (a) found.push({ tab: t, a: a });
-    });
-    if (found.length < 2) return false;
+    if (!document.body) return false;
+
+    var li = isLoggedIn();
+    var file = (location.pathname.split('/').pop() || 'index').toLowerCase().replace(/\.html$/, '');
+    var folder = location.pathname.split('/').filter(Boolean)[0] || '';
+    var isStories = file === 'stories' || file === 'story' || file === 'readchapter' ||
+                    folder === 'story' || folder === 'chapter';
+
+    var tabs = [
+      { label: 'Home', icon: '🏠', href: li ? '/home.html' : '/guest.html',
+        active: file === 'home' || file === 'guest' },
+      { label: 'Stories', icon: '📚', href: '/stories.html', active: isStories },
+      { label: 'Profile', icon: '👤', href: li ? '/dashboard.html' : '/index.html',
+        active: file === 'dashboard' || file === 'author-dashboard' || (!li && file === 'index') },
+      { label: 'Settings', icon: '⚙️', href: '/settings.html', active: file === 'settings' }
+    ];
 
     var bar = document.createElement('nav');
     bar.id = 'app-tabbar';
-    var here = fileOf(location.pathname);
-    found.forEach(function (f) {
+    tabs.forEach(function (t) {
       var link = document.createElement('a');
-      link.href = f.a.getAttribute('href');
-      link.innerHTML = '<span class="ti">' + f.tab.icon + '</span><span>' + f.tab.label + '</span>';
-      if (f.a.getAttribute('aria-current') === 'page' || fileOf(link.getAttribute('href')) === here) link.className = 'active';
+      link.href = t.href;
+      link.innerHTML = '<span class="ti">' + t.icon + '</span><span>' + t.label + '</span>';
+      if (t.active) link.className = 'active';
       link.addEventListener('click', function () { if (window.buzz) window.buzz(); });
       bar.appendChild(link);
-      f.a.classList.add('app-hide');
     });
     document.body.appendChild(bar);
     return true;

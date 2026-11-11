@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="cookie-consent.js"></script>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-2W62NFYZJ3"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-2W62NFYZJ3');
+  </script>
+  <meta name="theme-color" content="#667eea">
+  <link rel="stylesheet" href="/native.css">
+  <script src="/native.js" defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Settings | TaleTrove</title>
+  <link rel="stylesheet" href="main.css">
+  <link rel="stylesheet" href="legal.css">
+  <style>
+    .legal-card .set-group { margin: 26px 0 0; }
+    .legal-card .set-group h2 { margin: 0 0 6px; font-size: 1.05rem; text-transform: uppercase; letter-spacing: .04em; }
+    .legal-card .set-row {
+      display: flex; align-items: center; justify-content: space-between;
+      width: 100%; box-sizing: border-box; min-height: 52px; margin: 0; padding: 12px 4px;
+      background: none; border: 0; border-bottom: 1px solid #eceef3; border-radius: 0; box-shadow: none;
+      color: #333; font: inherit; font-size: 1rem; text-align: left; text-decoration: none; cursor: pointer;
+    }
+    .legal-card .set-row:hover { background: none; color: #764ba2; }
+    .legal-card .set-row::after { content: "\203A"; color: #9aa0b4; font-size: 1.4rem; line-height: 1; }
+    .legal-card .set-row.no-arrow::after { content: ""; }
+    .legal-card .set-note { margin: 6px 4px 0; font-size: .85rem; color: #777; }
+    #setMsg { min-height: 1.4em; margin: 14px 4px 0; font-size: .95rem; color: #3a7d44; }
+    .legal-card .set-copy { margin: 30px 0 0; text-align: center; color: #888; font-size: .9rem; }
+  </style>
+</head>
+<body>
+  <div class="js-header"></div>
+
+  <main id="main">
+    <article class="legal-card">
+      <h1>Settings</h1>
+
+      <section class="set-group" aria-labelledby="g-about">
+        <h2 id="g-about">About</h2>
+        <a class="set-row" href="about.html">About TaleTrove</a>
+        <a class="set-row" href="contact.html">Contact us</a>
+      </section>
+
+      <section class="set-group" aria-labelledby="g-legal">
+        <h2 id="g-legal">Legal</h2>
+        <a class="set-row" href="privacy.html">Privacy Policy</a>
+        <a class="set-row" href="terms.html">Terms</a>
+        <a class="set-row" href="disclaimer.html">Disclaimer</a>
+      </section>
+
+      <section class="set-group" aria-labelledby="g-app">
+        <h2 id="g-app">App</h2>
+        <button type="button" class="set-row" id="cookieBtn">Cookie settings</button>
+        <button type="button" class="set-row" id="shareBtn">Share TaleTrove</button>
+        <button type="button" class="set-row no-arrow" id="refreshBtn">Refresh app data</button>
+        <p class="set-note">Refresh clears the saved copies of pages on this device. You stay logged in.</p>
+        <p id="setMsg" role="status" aria-live="polite"></p>
+      </section>
+
+      <p class="set-copy">&copy; <span id="yr">2026</span> TaleTrove.</p>
+    </article>
+  </main>
+
+  <div class="js-footer">
+    <footer>
+      <p>© 2026 TaleTrove. <br><br>
+      <a href="about.html">About</a> | <a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms</a> | <a href="disclaimer.html">Disclaimer</a> | <a href="contact.html">Contact</a>
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      var msg = document.getElementById('setMsg');
+      function say(t) { msg.textContent = t; }
+      document.getElementById('yr').textContent = new Date().getFullYear();
+
+      document.getElementById('cookieBtn').addEventListener('click', function () {
+        if (window.ttCookieSettings) window.ttCookieSettings();
+        else say('Cookie settings are not available right now.');
+      });
+
+      document.getElementById('shareBtn').addEventListener('click', function () {
+        var data = { title: 'TaleTrove', text: 'Read and share stories on TaleTrove', url: 'https://taletroves.netlify.app/' };
+        var C = window.Capacitor;
+        var plugin = C && C.Plugins && C.Plugins.Share;
+        try {
+          if (plugin) { plugin.share({ title: data.title, text: data.text, url: data.url, dialogTitle: 'Share TaleTrove' }); return; }
+          if (navigator.share) { navigator.share(data); return; }
+          if (navigator.clipboard) { navigator.clipboard.writeText(data.url); say('Link copied.'); return; }
+          say(data.url);
+        } catch (e) { say(data.url); }
+      });
+
+      document.getElementById('refreshBtn').addEventListener('click', async function () {
+        say('Refreshing...');
+        try {
+          if ('serviceWorker' in navigator) {
+            var regs = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(regs.map(function (r) { return r.unregister(); }));
+          }
+          if (window.caches) {
+            var keys = await caches.keys();
+            await Promise.all(keys.map(function (k) { return caches.delete(k); }));
+          }
+        } catch (e) { /* reload anyway */ }
+        location.reload();
+      });
+    })();
+  </script>
+  <script type="module" src="main.js"></script>
+</body>
+</html>

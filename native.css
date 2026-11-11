@@ -56,3 +56,6 @@ html.is-app .app-search-toggle {
 html.is-app .hero { padding: 40px 20px; margin-bottom: 24px; border-radius: 0 0 32px 32px; }
 html.is-app .hero h1 { font-size: 2.1rem; }
 html.is-app .install-card { display: none !important; }
+
+/* ---- No footer in the app: its links live in Settings ---- */
+html.is-app footer, html.is-app .js-footer { display: none !important; }
