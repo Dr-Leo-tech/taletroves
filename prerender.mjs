@@ -39,8 +39,11 @@ const HEAD_COMMON = `<script src="cookie-consent.js"></script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-2W62NFYZJ3');
-  </script>`;
+        gtag('config', 'G-2W62NFYZJ3');
+  </script>
+  <meta name="theme-color" content="#667eea">
+  <link rel="stylesheet" href="/native.css">
+  <script src="/native.js" defer></script>`;
 
 const FOOTER = `<footer>
       <p>© ${new Date().getFullYear()} TaleTrove. <br><br>
