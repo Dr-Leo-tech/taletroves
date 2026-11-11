@@ -12,7 +12,7 @@
   gtag('config', 'G-2W62NFYZJ3');
 </script>
 <meta name="theme-color" content="#667eea">
-    <link rel="stylesheet" href="/native.css">
+<link rel="stylesheet" href="/native.css">
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -117,6 +117,7 @@ body {
   <main class="container">
       <h1>Latest Stories 📖</h1>
       <div id="publicFeed" class="stories-grid">Gathering stories...</div>
+      <div id="moreWrap"></div>
   </main>
 
 <!-- FOOTER -->
@@ -132,80 +133,125 @@ body {
     const supabaseClient = TT.client;
     const esc = TT.esc;
 
-    async function loadFeed() {
-    try {
-        const feed = document.getElementById('publicFeed');
-        if (!supabaseClient) {
-            feed.innerHTML = '<p>The story library could not be reached. Please refresh the page.</p>';
-            return;
-        }
+    const PAGE_SIZE = 12;
+    const SELECT = 'id, title, content, author_id, profiles(username), likes(count), comments(count)';
 
-        // Header search sends visitors here as stories.html?q=term. The search
-        // runs in the database so the whole library is never downloaded.
-        const params = new URLSearchParams(location.search);
-        const q = (params.get('q') || '').trim();
-        const by = params.get('by') === 'author' ? 'author' : 'title';
-        const SELECT = 'id, title, content, author_id, profiles(username), likes(count), comments(count)';
-        const wild = '%' + q.replace(/[%_,()\\*]/g, ' ') + '%';
-
-        let rows = null;
-        if (q && by === 'title') {
-            const r = await supabaseClient.from('stories').select(SELECT).ilike('title', wild)
-                .order('created_at', { ascending: false });
-            if (!r.error) rows = r.data;
-        } else if (q) {
-            const r = await supabaseClient.from('profiles').select('id').ilike('username', wild);
-            if (!r.error) {
-                const ids = (r.data || []).map(a => a.id);
-                rows = ids.length ? null : [];
-                if (ids.length) {
-                    const s = await supabaseClient.from('stories').select(SELECT)
-                        .in('author_id', ids).order('created_at', { ascending: false });
-                    rows = s.error ? null : s.data;
-                }
-            }
-        }
-
-        // No search, or the database filter was rejected: load everything and
-        // filter in the browser as a fallback.
-        if (rows === null) {
-            const { data, error } = await supabaseClient.from('stories').select(SELECT)
-                .order('created_at', { ascending: false });
-            if (error) throw error;
-            rows = q
-                ? data.filter(s => String((by === 'author' ? s.profiles?.username : s.title) || '').toLowerCase().includes(q.toLowerCase()))
-                : data;
-        }
-
-        if (q && !rows.length) {
-            feed.innerHTML = `<p>No stories found with ${by === 'author' ? 'an author named' : 'a title containing'} “${esc(q)}”. Try a different word, or <a href="stories.html" style="color:#667eea;">see all stories</a>.</p>`;
-            return;
-        }
-
-        feed.innerHTML = rows.map(story => {
-            // Extract counts safely
-            const likeCount = story.likes?.[0]?.count || 0;
-            const commentCount = story.comments?.[0]?.count || 0;
-
-            return `
-                <div class="story-card">
-                    <div>
-                        <h2 class="story-title">${esc(story.title)}</h2>
-                        <p class="story-author">By <a href="author.html?id=${encodeURIComponent(story.author_id)}" style="color:#667eea;text-decoration:none;">${esc(story.profiles?.username || 'Unknown Author')}</a></p>
-                        <p class="story-preview">${esc((story.content || '').substring(0, 120))}...</p>
-                        <div style="margin-bottom: 15px; font-size: 0.9em; color: #764ba2;">
-                            <span style="margin-right: 15px;">❤️ ${likeCount}</span>
-                            <span>💬 ${commentCount}</span>
-                        </div>
+    function storyCard(story) {
+        const likeCount = story.likes?.[0]?.count || 0;
+        const commentCount = story.comments?.[0]?.count || 0;
+        return `
+            <div class="story-card">
+                <div>
+                    <h2 class="story-title">${esc(story.title)}</h2>
+                    <p class="story-author">By <a href="author.html?id=${encodeURIComponent(story.author_id)}" style="color:#667eea;text-decoration:none;">${esc(story.profiles?.username || 'Unknown Author')}</a></p>
+                    <p class="story-preview">${esc((story.content || '').substring(0, 120))}...</p>
+                    <div style="margin-bottom: 15px; font-size: 0.9em; color: #764ba2;">
+                        <span style="margin-right: 15px;">❤️ ${likeCount}</span>
+                        <span>💬 ${commentCount}</span>
                     </div>
-                    <a href="story.html?id=${encodeURIComponent(story.id)}" class="read-btn">Read Full Story →</a>
                 </div>
-            `;
-        }).join('');
-    } catch (err) {
-        console.error("Feed error:", err);
+                <a href="story.html?id=${encodeURIComponent(story.id)}" class="read-btn">Read Full Story →</a>
+            </div>
+        `;
     }
-}
+
+    async function loadFeed() {
+        const feed = document.getElementById('publicFeed');
+        const more = document.getElementById('moreWrap');
+        try {
+            if (!supabaseClient) {
+                feed.innerHTML = '<p>The story library could not be reached. Please refresh the page.</p>';
+                return;
+            }
+
+            // Header search sends visitors here as stories.html?q=term. The search
+            // runs in the database, and results arrive one page at a time so the
+            // whole library is never downloaded.
+            const params = new URLSearchParams(location.search);
+            const q = (params.get('q') || '').trim();
+            const by = params.get('by') === 'author' ? 'author' : 'title';
+            const wild = '%' + q.replace(/[%_,()\\*]/g, ' ') + '%';
+            const noResults = `<p>No stories found with ${by === 'author' ? 'an author named' : 'a title containing'} “${esc(q)}”. Try a different word, or <a href="stories.html" style="color:#667eea;">see all stories</a>.</p>`;
+
+            // Author search: find matching authors first.
+            let authorIds = null;
+            if (q && by === 'author') {
+                const r = await supabaseClient.from('profiles').select('id').ilike('username', wild).limit(100);
+                if (!r.error) authorIds = (r.data || []).map(a => a.id);
+                if (authorIds && !authorIds.length) { feed.innerHTML = noResults; return; }
+            }
+
+            // One page of stories, newest first.
+            function pageQuery(from) {
+                let query = supabaseClient.from('stories').select(SELECT);
+                if (q && by === 'title') query = query.ilike('title', wild);
+                else if (q && by === 'author') query = query.in('author_id', authorIds);
+                return query
+                    .order('created_at', { ascending: false })
+                    .order('id', { ascending: false })
+                    .range(from, from + PAGE_SIZE - 1);
+            }
+
+            let firstRows = null;
+            const canFilterInDatabase = !(q && by === 'author' && authorIds === null);
+            if (canFilterInDatabase) {
+                const r = await pageQuery(0);
+                if (!r.error) firstRows = r.data || [];
+                else if (!q) throw r.error;
+            }
+
+            // The database filter was rejected: fall back to the 200 newest stories
+            // and filter them in the browser.
+            if (firstRows === null) {
+                const { data, error } = await supabaseClient.from('stories').select(SELECT)
+                    .order('created_at', { ascending: false }).limit(200);
+                if (error) throw error;
+                const rows = (data || []).filter(s => String((by === 'author' ? s.profiles?.username : s.title) || '').toLowerCase().includes(q.toLowerCase()));
+                feed.innerHTML = rows.length ? rows.map(storyCard).join('') : noResults;
+                return;
+            }
+
+            if (!firstRows.length) {
+                feed.innerHTML = q ? noResults : '<p>No stories have been published yet.</p>';
+                return;
+            }
+
+            feed.innerHTML = firstRows.map(storyCard).join('');
+            let from = firstRows.length;
+            let hasMore = firstRows.length === PAGE_SIZE;
+
+            function showMore() {
+                more.innerHTML = hasMore
+                    ? '<button type="button" id="moreBtn" style="display:block;margin:10px auto 30px;padding:12px 28px;background:#667eea;color:#fff;border:0;border-radius:8px;font-size:1rem;font-weight:bold;cursor:pointer;">Load more stories</button>'
+                    : '';
+            }
+            showMore();
+
+            more.addEventListener('click', async (e) => {
+                const btn = e.target.closest('#moreBtn');
+                if (!btn) return;
+                btn.disabled = true;
+                btn.textContent = 'Loading...';
+                try {
+                    const r = await pageQuery(from);
+                    if (r.error) throw r.error;
+                    const rows = r.data || [];
+                    feed.insertAdjacentHTML('beforeend', rows.map(storyCard).join(''));
+                    from += rows.length;
+                    hasMore = rows.length === PAGE_SIZE;
+                } catch (err) {
+                    console.error('Load more error:', err);
+                    btn.disabled = false;
+                    btn.textContent = 'Could not load. Tap to try again';
+                    return;
+                }
+                showMore();
+            });
+        } catch (err) {
+            console.error('Feed error:', err);
+            feed.innerHTML = '<p>Stories could not be loaded. Please check your connection and refresh the page.</p>';
+        }
+    }
 
     window.onload = loadFeed;
 </script>

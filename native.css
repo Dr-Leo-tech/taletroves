@@ -21,7 +21,7 @@ html.is-app img { -webkit-user-drag: none; }
 html.is-app ::-webkit-scrollbar { display: none; }
 
 /* ---- Bottom tab bar (app only) ---- */
-html.is-app body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+html.is-app.has-tabbar body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
 html.is-app .app-hide { display: none !important; }
 
 #app-tabbar {
