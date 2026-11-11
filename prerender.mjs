@@ -109,6 +109,26 @@ const articleLd = ({ headline, url, author, date, partOf }) => ({
 });
 const previewOf = (s, n = 60) => { const w = String(s ?? '').trim().match(/\S+/g) || []; return w.slice(0, n).join(' ') + (w.length > n ? '…' : ''); };
 
+// Replaces whatever is currently inside <div id="publicFeed"> (placeholder text
+// on the first run, an earlier injection on later runs) with fresh cards.
+// Returns null when the container is not found.
+function replaceFeed(html, cards) {
+  const open = html.match(/<div id="publicFeed"[^>]*>/);
+  if (!open) return null;
+  const start = open.index + open[0].length;
+  const tag = /<div\b|<\/div>/gi;
+  tag.lastIndex = start;
+  let depth = 1;
+  let m;
+  while ((m = tag.exec(html))) {
+    depth += m[0][1] === '/' ? -1 : 1;
+    if (depth === 0) {
+      return html.slice(0, start) + `\n${cards}\n      ` + html.slice(m.index);
+    }
+  }
+  return null;
+}
+
 // Premium columns may not exist yet: try with them, fall back to the basic columns.
 async function fetchWithFallback(table, withPremium, basic, order) {
   try { return await fetchAll(table, withPremium, order); }
@@ -186,8 +206,8 @@ async function main() {
         <p class="story-preview">${esc(snippet(s.content, 120))}</p></div>
         <a href="${esc(storyPath(s))}" class="read-btn">Read Full Story →</a></div>`).join('\n');
     let html = readFileSync(sp, 'utf8');
-    const re = /(<div id="publicFeed"[^>]*>)[\s\S]*?(<\/div>\s*\n)/;
-    if (re.test(html)) writeFileSync(sp, html.replace(re, (_, a, b) => `${a}\n${cards}\n${b}`));
+    const updated = replaceFeed(html, cards);
+    if (updated !== null) writeFileSync(sp, updated);
   }
 
   // Sitemap

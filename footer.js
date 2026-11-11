@@ -21,4 +21,3 @@ export function readerFooter(){
     `;
     footerElement.innerHTML = footerhtml;
 }
-readerFooter();

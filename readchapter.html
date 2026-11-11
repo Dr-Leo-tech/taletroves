@@ -18,6 +18,7 @@
 <link rel="stylesheet" href="/native.css">
 <script src="/native.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="db.js"></script>
     <title>Read Chapter | TaleTrove</title>
   <meta name="description" content="Read a chapter of a story on TaleTrove.">
   <meta property="og:type" content="website">
@@ -78,9 +79,7 @@
   </div>
 
     <script>
-        const supabaseUrl = 'https://oadbiabeqavrvtymcvuv.supabase.co';
-        const supabaseKey = 'sb_publishable_cQvpBFh00y0lujudlGhlJQ_ltN3ltN7';
-        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        const supabaseClient = TT.client;
 
         let currentStoryId = null;
 
@@ -90,6 +89,11 @@
 
             if (!chapterId) {
                 window.location.href = "stories.html";
+                return;
+            }
+
+            if (!supabaseClient) {
+                document.getElementById('chContent').innerText = "The story library could not be reached. Please refresh the page.";
                 return;
             }
 

@@ -13,8 +13,12 @@ function readSession() {
         if (!raw) return null;
         const obj = JSON.parse(raw);
         const s = obj && (obj.currentSession || obj);
+        if (!s) return null;
+        // An expired access token with no refresh token can never be renewed.
+        const expiresAt = Number(s.expires_at) * 1000; // stored in seconds
+        if (expiresAt > 0 && expiresAt < Date.now() && !s.refresh_token) return null;
         // A refresh token means the Supabase client can renew an expired access token.
-        return s && (s.access_token || s.refresh_token) ? s : null;
+        return (s.access_token || s.refresh_token) ? s : null;
     } catch (e) {
         return null;
     }
@@ -23,7 +27,15 @@ function readSession() {
 async function logout() {
     const s = readSession();
     try {
-        if (s && s.access_token) {
+        // Prefer the SDK client already loaded on the page so refresh tokens
+        // and any other session storage are cleared too.
+        const C = (window.TT && window.TT.client)
+            || (window.supabase && typeof window.supabase.createClient === 'function'
+                ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+                : null);
+        if (C) {
+            await C.auth.signOut();
+        } else if (s && s.access_token) {
             await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
                 method: 'POST',
                 headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${s.access_token}` }

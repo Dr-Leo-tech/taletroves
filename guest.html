@@ -18,6 +18,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <link rel="stylesheet" href="main.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="db.js"></script>
     <title>Explore TaleTrove as a Guest</title>
   <meta name="description" content="Explore the latest chronicles on TaleTrove without signing up. Read stories as a guest, then join to like and comment.">
   <link rel="canonical" href="https://taletroves.netlify.app/guest.html">
@@ -104,13 +105,14 @@
     </footer>
   </div>
     <script>
-    // Supabase configuration
-const supabaseUrl = 'https://oadbiabeqavrvtymcvuv.supabase.co';
-const supabaseKey = 'sb_publishable_cQvpBFh00y0lujudlGhlJQ_ltN3ltN7';
-const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-        const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const supabaseClient = TT.client;
+        const esc = TT.esc;
 
 async function loadGuestStories() {
+    if (!supabaseClient) {
+        document.getElementById('guestStoriesGrid').innerHTML = "<p>The story library could not be reached. Please refresh the page.</p>";
+        return;
+    }
     // 1. Updated Select query to fetch counts for likes and comments
     const { data, error } = await supabaseClient
         .from('stories')

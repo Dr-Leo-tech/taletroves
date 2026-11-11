@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="/native.css">
 <script src="/native.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="db.js"></script>
     <link rel="stylesheet" href="main.css">
     <style>
         html, body { height: 100%; margin: 0; }
@@ -72,15 +73,16 @@
   </div>
 
     <script>
-        const supabaseUrl = 'https://oadbiabeqavrvtymcvuv.supabase.co';
-        const supabaseKey = 'sb_publishable_cQvpBFh00y0lujudlGhlJQ_ltN3ltN7';
-        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-
-        const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        const supabaseClient = TT.client;
+        const esc = TT.esc;
 
         async function loadAuthor() {
             const authorId = new URLSearchParams(window.location.search).get('id')?.trim();
             if (!authorId) { window.location.href = 'stories.html'; return; }
+            if (!supabaseClient) {
+                document.getElementById('authorName').innerText = 'The story library could not be reached. Please refresh the page.';
+                return;
+            }
 
             // 1. Public stats (username + counts) from the author_stats view
             const { data: stats, error: sErr } = await supabaseClient

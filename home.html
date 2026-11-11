@@ -19,6 +19,7 @@
    <link rel="stylesheet" href="main.css">
   
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="db.js"></script>
     <title>TaleTrove - Home | Latest Stories</title>
   <meta name="description" content="Catch up on the newest stories from TaleTrove authors, or browse the full library of chapter-by-chapter fiction.">
   <link rel="canonical" href="https://taletroves.netlify.app/home.html">
@@ -88,12 +89,14 @@
   </div>
     
         <script>
-        const supabaseUrl = 'https://oadbiabeqavrvtymcvuv.supabase.co';
-        const supabaseKey = 'sb_publishable_cQvpBFh00y0lujudlGhlJQ_ltN3ltN7';
-        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-        const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        const supabaseClient = TT.client;
+        const esc = TT.esc;
 
         async function loadHomeStories() {
+            if (!supabaseClient) {
+                document.getElementById('latestStoriesGrid').innerHTML = "<p>The story library could not be reached. Please refresh the page.</p>";
+                return;
+            }
             // 1. Updated Select query to fetch counts for likes and comments
             const { data, error } = await supabaseClient
                 .from('stories')

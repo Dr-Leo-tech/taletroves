@@ -18,6 +18,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="main.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="db.js"></script>
     <title>Read a Story | TaleTrove</title>
   <meta name="description" content="Read this story chapter by chapter on TaleTrove, and share your thoughts in the comments.">
   <meta property="og:type" content="website">
@@ -86,10 +87,8 @@
   </div>
 
     <script>
-        const supabaseUrl = 'https://oadbiabeqavrvtymcvuv.supabase.co';
-        const supabaseKey = 'sb_publishable_cQvpBFh00y0lujudlGhlJQ_ltN3ltN7';
-        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-        const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        const supabaseClient = TT.client;
+        const esc = TT.esc;
 
   async function loadStoryData() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -98,6 +97,11 @@
     if (!storyId) {
         console.error("No story ID found in URL");
         window.location.href = "stories.html";
+        return;
+    }
+
+    if (!supabaseClient) {
+        document.getElementById('storyTitle').innerText = "The story library could not be reached. Please refresh the page.";
         return;
     }
 

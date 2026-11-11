@@ -38,3 +38,21 @@ html.is-app .app-hide { display: none !important; }
 }
 #app-tabbar .ti { font-size: 20px; line-height: 1; }
 #app-tabbar a.active { color: #667eea; font-weight: 600; }
+
+/* ---- Compact app header ---- */
+html.is-app header.tt-header { padding: 8px 0; }
+html.is-app header.tt-header .tt-nav { display: none; }
+html.is-app header.tt-header .tt-top { flex-wrap: wrap; }
+html.is-app header.tt-header .tt-search { display: none; flex: 1 1 100%; margin-top: 8px; }
+html.is-app header.tt-header .tt-top.search-open .tt-search { display: flex; }
+html.is-app .app-search-toggle {
+  flex: none; width: 40px; height: 40px; padding: 0; margin-left: auto;
+  display: flex; align-items: center; justify-content: center;
+  border: 0; border-radius: 50%;
+  background: rgba(255,255,255,.2); color: #fff;
+}
+
+/* ---- Tighter hero on small screens, no web install banner in the app ---- */
+html.is-app .hero { padding: 40px 20px; margin-bottom: 24px; border-radius: 0 0 32px 32px; }
+html.is-app .hero h1 { font-size: 2.1rem; }
+html.is-app .install-card { display: none !important; }

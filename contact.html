@@ -246,6 +246,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="db.js"></script>
   <script>
     // ============================================================
     // EDIT YOUR CONTACT DETAILS HERE. Leave a value as "" to hide it.
@@ -284,11 +285,7 @@
     showDetail('location', CONTACT.location);
 
     // ---------- Supabase ----------
-    const supabaseUrl = 'https://oadbiabeqavrvtymcvuv.supabase.co';
-    const supabaseKey = 'sb_publishable_cQvpBFh00y0lujudlGhlJQ_ltN3ltN7';
-    const supabaseClient = (typeof supabase !== 'undefined')
-      ? supabase.createClient(supabaseUrl, supabaseKey)
-      : null;
+    const supabaseClient = TT.client;
 
     // ---------- Form ----------
     const form = document.getElementById('contactForm');

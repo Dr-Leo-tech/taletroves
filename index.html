@@ -323,12 +323,12 @@
   © 2026 TaleTrove &middot;
   <a href="about.html">About</a> | <a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms</a> | <a href="disclaimer.html">Disclaimer</a> | <a href="contact.html">Contact</a>
 </footer>
+<!-- Loaded here so the page renders first, but before the script below runs -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="db.js"></script>
 <script>
-  const supabaseUrl = 'https://oadbiabeqavrvtymcvuv.supabase.co';
-  const supabaseKey = 'sb_publishable_cQvpBFh00y0lujudlGhlJQ_ltN3ltN7';
-
-  // Declared here so all functions can access it, initialized in window.onload
-  let supabaseClient = null;
+  // Shared client from db.js (null when the CDN is blocked).
+  const supabaseClient = TT.client;
 
   // --- LOADING HELPER ---
   function setLoading(btnId, isLoading, defaultText) {
@@ -343,7 +343,7 @@
   // --- AUTH LOGIC ---
   async function signup() {
     if (!supabaseClient) {
-      alert("App is still loading. Please wait a moment and try again.");
+      alert("The database could not load. Please check your connection and refresh the page.");
       return;
     }
     setLoading('signupBtn', true);
@@ -372,7 +372,8 @@ try {
   if (error) {
     alert(error.message || "Signup failed.");
   } else {
-    // Manually insert profile row
+    // Best effort: the visitor is not confirmed yet, so RLS may reject this
+    // insert. The dashboards heal a missing row with TT.ensureProfile.
     const { error: profileError } = await supabaseClient
       .from('profiles')
       .insert({
@@ -383,12 +384,11 @@ try {
         role: isAuthor ? 'author' : 'reader'
       });
 
-    if (profileError) {
-      alert("Account created but profile setup failed: " + profileError.message);
-    } else {
-      alert("Signup successful! Please check your email to confirm your account.");
-      showLogin();
+    if (profileError && profileError.code !== '23505') {
+      console.warn("Profile row will be created on first login:", profileError.message);
     }
+    alert("Signup successful! Please check your email to confirm your account.");
+    showLogin();
   }
 } catch (err) {
   alert(err.message || err.toString() || "An unexpected error occurred.");
@@ -399,7 +399,7 @@ try {
 
   async function login() {
     if (!supabaseClient) {
-      alert("App is still loading. Please wait a moment and try again.");
+      alert("The database could not load. Please check your connection and refresh the page.");
       return;
     }
     setLoading('loginBtn', true);
@@ -442,7 +442,7 @@ try {
 
   async function forgotPassword() {
     if (!supabaseClient) {
-      alert("App is still loading. Please wait a moment and try again.");
+      alert("The database could not load. Please check your connection and refresh the page.");
       return;
     }
     const email = document.getElementById('liEmail').value.trim();
@@ -464,44 +464,36 @@ try {
     }, 10);
   }
 
-  // --- HIDE LOADER — runs immediately, independent of Supabase ---
-  // This guarantees the loader always disappears after 2.5s no matter what
+  // --- HIDE LOADER ---
+  // Hides as soon as the page has loaded (plus a small paint delay). The
+  // timeout is only a safety net so the loader can never trap the visitor.
+  let loaderHidden = false;
   function hideLoader() {
     const loader = document.getElementById("loader");
-    if (!loader) return;
+    if (!loader || loaderHidden) return;
+    loaderHidden = true;
     setTimeout(() => {
-      loader.style.transition = "opacity 0.5s";
+      loader.style.transition = "opacity 0.45s";
       loader.style.opacity = "0";
-      setTimeout(() => { loader.style.display = "none"; }, 500);
-    }, 2500);
+      setTimeout(() => { loader.style.display = "none"; }, 450);
+    }, 250);
   }
-  hideLoader();
+  if (document.readyState === "complete") hideLoader();
+  else window.addEventListener("load", hideLoader);
+  setTimeout(hideLoader, 3000);
 
   // --- ON PAGE LOAD ---
-  // Poll until supabase global is ready (handles slow CDN loads)
-  function waitForSupabase(callback) {
-    if (typeof supabase !== 'undefined') {
-      callback();
-    } else {
-      setTimeout(() => waitForSupabase(callback), 50);
-    }
-  }
-
-  waitForSupabase(async () => {
-    supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+  // Already signed in? Go straight to the home page.
+  (async () => {
+    if (!supabaseClient) return;
     try {
       const { data: { user } } = await supabaseClient.auth.getUser();
-      if (user) {
-        window.location.href = "home.html";
-      }
+      if (user) window.location.replace("home.html");
     } catch (err) {
       console.error("Session check error:", err);
     }
-  });
+  })();
 </script>
-
-<!-- Supabase loaded at end of body so it never blocks page render -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 </body>
 </html>

@@ -77,7 +77,7 @@
       var link = document.createElement('a');
       link.href = f.a.getAttribute('href');
       link.innerHTML = '<span class="ti">' + f.tab.icon + '</span><span>' + f.tab.label + '</span>';
-      if (fileOf(link.getAttribute('href')) === here) link.className = 'active';
+      if (f.a.getAttribute('aria-current') === 'page' || fileOf(link.getAttribute('href')) === here) link.className = 'active';
       link.addEventListener('click', function () { if (window.buzz) window.buzz(); });
       bar.appendChild(link);
       f.a.classList.add('app-hide');
@@ -86,8 +86,32 @@
     return true;
   }
 
+  // ---- Compact header: logo + search icon (search row opens on tap) ----
+  function compactHeader() {
+    var top = document.querySelector('header.tt-header .tt-top');
+    if (!top) return false;
+    if (top.querySelector('.app-search-toggle')) return true;
+    var form = top.querySelector('.tt-search');
+    if (!form) return false;
+    var input = form.querySelector('input');
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'app-search-toggle';
+    btn.setAttribute('aria-label', 'Search');
+    btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>';
+    top.insertBefore(btn, form);
+    if (input && input.value) top.classList.add('search-open');
+    btn.addEventListener('click', function () {
+      top.classList.toggle('search-open');
+      if (top.classList.contains('search-open') && input) input.focus();
+    });
+    return true;
+  }
+
   var tries = 0;
   var timer = setInterval(function () {
-    if (buildTabBar() || ++tries > 25) clearInterval(timer);
+    var tabsDone = buildTabBar();
+    var headerDone = compactHeader();
+    if ((tabsDone && headerDone) || ++tries > 25) clearInterval(timer);
   }, 200);
 })();

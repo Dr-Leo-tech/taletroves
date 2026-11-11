@@ -18,10 +18,10 @@
  <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="stylesheet" href="main.css">
     
-  <title>User Dashboard</title>
+  <title>Author Dashboard | TaleTrove</title>
   <meta name="robots" content="noindex,nofollow">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="db.js"></script>
 
     <style>
    
@@ -132,10 +132,8 @@
 </div>
 
 <script>
-    const supabaseUrl = 'https://oadbiabeqavrvtymcvuv.supabase.co';
-    const supabaseKey = 'sb_publishable_cQvpBFh00y0lujudlGhlJQ_ltN3ltN7';
-    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const supabaseClient = TT.client;
+    const esc = TT.esc;
     window.editStoryById = function(id){ const s = (window.__myStories||{})[id]; if (s) window.editStory(s.id, s.title, s.content); };
 
     let currentUser = null;
@@ -152,18 +150,25 @@
         currentUser = user;
 
         // Fetch profile to verify role and get username
-        const { data: profile } = await supabaseClient
+        let { data: profile } = await supabaseClient
             .from('profiles')
             .select('*')
             .eq('id', user.id)
-            .single();
+            .maybeSingle();
 
-        if (!profile || profile.role !== 'author') {
-            window.location.href = "dashboard.html"; 
+        // Heal accounts whose profile row was never created (see db.js).
+        if (!profile) profile = await TT.ensureProfile(user);
+
+        // Fall back to the signup metadata so a missing row can never bounce
+        // the user between the two dashboards forever.
+        const role = profile?.role || user.user_metadata?.role || 'reader';
+        if (role !== 'author') {
+            window.location.href = "dashboard.html";
             return;
         }
 
-        document.getElementById('welcomeMsg').innerHTML = `Welcome back, <strong>${esc(profile.username)}</strong>!`;
+        const username = profile?.username || user.user_metadata?.display_name || 'Author';
+        document.getElementById('welcomeMsg').innerHTML = `Welcome back, <strong>${esc(username)}</strong>!`;
         
         const profileLink = document.getElementById('publicProfileLink');
         profileLink.href = `author.html?id=${user.id}`;

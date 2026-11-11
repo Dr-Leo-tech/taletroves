@@ -21,7 +21,7 @@
   <title>User Dashboard</title>
   <meta name="robots" content="noindex,nofollow">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="db.js"></script>
   <style>
    .container {
   width: 90%;          /* Mobile friendly */
@@ -86,16 +86,13 @@
   
 <script>
 document.addEventListener("DOMContentLoaded", async function () {
-  const supabaseUrl = 'https://oadbiabeqavrvtymcvuv.supabase.co';
-  const supabaseKey = 'sb_publishable_cQvpBFh00y0lujudlGhlJQ_ltN3ltN7';
-  
-  if (typeof supabase === 'undefined') {
+  if (!TT.client) {
     alert("Database library blocked. Please turn off Data Saver/Ad-blockers.");
     return;
   }
 
-  const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const supabaseClient = TT.client;
+  const esc = TT.esc;
 
   // 1. SECURITY CHECK: Is user logged in?
   const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
@@ -107,14 +104,17 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   // 2. FETCH PROFILE DATA
   // We use 'profiles' (lowercase) and match on 'id'
-  const { data: profile, error: profileError } = await supabaseClient
+  let { data: profile } = await supabaseClient
     .from("profiles")
     .select("*")
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
+
+  // Heal accounts whose profile row was never created (see db.js).
+  if (!profile) profile = await TT.ensureProfile(user);
 
   // 3. HANDLE REDIRECTION (If user is an author)
-  const role = profile?.role || user.user_metadata.role || 'reader';
+  const role = profile?.role || user.user_metadata?.role || 'reader';
   if (role === "author") {
     window.location.href = "author-dashboard.html";
     return;

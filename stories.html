@@ -25,6 +25,7 @@
   <meta property="og:description" content="Browse the latest stories published by TaleTrove authors. Read chapter by chapter, like your favourites and join the conversation.">
   <meta property="og:url" content="https://taletroves.netlify.app/stories.html">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="db.js"></script>
     <link rel="stylesheet" href="main.css">
     <style>
 /* Updated Styles for stories.html */
@@ -105,6 +106,7 @@ body {
         font-size: 0.9em;
     }
 </style>
+</head>
 
 <body>
   <div class="js-header"></div>
@@ -124,37 +126,54 @@ body {
   </div>
 
 <script>
-    const supabaseUrl = 'https://oadbiabeqavrvtymcvuv.supabase.co';
-    const supabaseKey = 'sb_publishable_cQvpBFh00y0lujudlGhlJQ_ltN3ltN7';
-    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-        const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const supabaseClient = TT.client;
+    const esc = TT.esc;
 
     async function loadFeed() {
     try {
-        // Fetch stories with the count of related likes and comments
-        const { data, error } = await supabaseClient
-            .from('stories')
-            .select(`
-                id, 
-                title, 
-                content, 
-                author_id,
-                profiles(username),
-                likes(count),
-                comments(count)
-            `)
-            .order('created_at', { ascending: false });
-
         const feed = document.getElementById('publicFeed');
-        if (error) throw error;
+        if (!supabaseClient) {
+            feed.innerHTML = '<p>The story library could not be reached. Please refresh the page.</p>';
+            return;
+        }
 
-        // Header search sends visitors here as stories.html?q=term
+        // Header search sends visitors here as stories.html?q=term. The search
+        // runs in the database so the whole library is never downloaded.
         const params = new URLSearchParams(location.search);
-        const q = (params.get('q') || '').trim().toLowerCase();
+        const q = (params.get('q') || '').trim();
         const by = params.get('by') === 'author' ? 'author' : 'title';
-        const rows = q
-            ? data.filter(s => String((by === 'author' ? s.profiles?.username : s.title) || '').toLowerCase().includes(q))
-            : data;
+        const SELECT = 'id, title, content, author_id, profiles(username), likes(count), comments(count)';
+        const wild = '%' + q.replace(/[%_,()\\*]/g, ' ') + '%';
+
+        let rows = null;
+        if (q && by === 'title') {
+            const r = await supabaseClient.from('stories').select(SELECT).ilike('title', wild)
+                .order('created_at', { ascending: false });
+            if (!r.error) rows = r.data;
+        } else if (q) {
+            const r = await supabaseClient.from('profiles').select('id').ilike('username', wild);
+            if (!r.error) {
+                const ids = (r.data || []).map(a => a.id);
+                rows = ids.length ? null : [];
+                if (ids.length) {
+                    const s = await supabaseClient.from('stories').select(SELECT)
+                        .in('author_id', ids).order('created_at', { ascending: false });
+                    rows = s.error ? null : s.data;
+                }
+            }
+        }
+
+        // No search, or the database filter was rejected: load everything and
+        // filter in the browser as a fallback.
+        if (rows === null) {
+            const { data, error } = await supabaseClient.from('stories').select(SELECT)
+                .order('created_at', { ascending: false });
+            if (error) throw error;
+            rows = q
+                ? data.filter(s => String((by === 'author' ? s.profiles?.username : s.title) || '').toLowerCase().includes(q.toLowerCase()))
+                : data;
+        }
+
         if (q && !rows.length) {
             feed.innerHTML = `<p>No stories found with ${by === 'author' ? 'an author named' : 'a title containing'} “${esc(q)}”. Try a different word, or <a href="stories.html" style="color:#667eea;">see all stories</a>.</p>`;
             return;
