@@ -42,7 +42,10 @@ const HEAD_COMMON = `<script src="cookie-consent.js"></script>
         gtag('config', 'G-2W62NFYZJ3');
   </script>
   <meta name="theme-color" content="#667eea">
-  <link rel="stylesheet" href="/native.css">
+      <link rel="stylesheet" href="/native.css">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <script src="/native.js" defer></script>`;
 
 const FOOTER = `<footer>

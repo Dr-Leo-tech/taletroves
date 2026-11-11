@@ -64,6 +64,10 @@
 
     var li = isLoggedIn();
     var file = (location.pathname.split('/').pop() || 'index').toLowerCase().replace(/\.html$/, '');
+
+    // No tab bar on the login and password-reset screens
+    if (file === 'index' || file === 'reset-password') return true;
+
     var folder = location.pathname.split('/').filter(Boolean)[0] || '';
     var isStories = file === 'stories' || file === 'story' || file === 'readchapter' ||
                     folder === 'story' || folder === 'chapter';
@@ -88,6 +92,7 @@
       bar.appendChild(link);
     });
     document.body.appendChild(bar);
+    document.documentElement.classList.add('has-tabbar');
     return true;
   }
 
